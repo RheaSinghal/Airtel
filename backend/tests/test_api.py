@@ -137,3 +137,12 @@ def test_insights_and_model(client):
     assert ins["funnel"][0]["count"] == 5000 and ins["funnel"][-1]["count"] == 368
     assert ins["activated_on_inactive_gstin"] == 22
     assert ins["model"]["auc"] > 0.6
+
+
+def test_hindi_multisite_answers_do_not_rename_business(client):
+    sid = client.post("/api/advisor/sessions", json={"lang": "hi"}).json()["id"]
+    r = say(client, sid, "मेरी जयपुर में 3 बेकरी हैं, 14 लोग काम करते हैं")
+    assert r["profile"]["sites"] == 3 and r["profile"]["segment"] == "multi"
+    r = say(client, sid, "मोबाइल हॉटस्पॉट")
+    assert r["profile"]["business_type"] == "Bakery"
+    assert r["profile"]["current_internet"] == "Mobile hotspot"

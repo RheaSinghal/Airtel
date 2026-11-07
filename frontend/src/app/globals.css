@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f6f4;
+  --surface: #ffffff;
+  --surface-2: #f1f0ed;
+  --foreground: #1a1a1a;
+  --muted: #6b6b66;
+  --border: #e4e2dc;
+  --brand: #d6001c;
+  --brand-ink: #ffffff;
+  --brand-soft: #fdecee;
+  --ok: #157f3b;
+  --ok-soft: #e7f5ec;
+  --warn: #9a5b00;
+  --warn-soft: #fff4e0;
+  --bad: #b3261e;
+  --bad-soft: #fdecea;
+  --chat-user: #1f2937;
+  --chart-bar: #2f6bc4;
+  --chart-hi: #d6001c;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-chat-user: var(--chat-user);
+  --font-sans: var(--font-noto), var(--font-noto-deva), system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #121212;
+    --surface: #1c1c1c;
+    --surface-2: #262626;
+    --foreground: #f2f2f0;
+    --muted: #a3a3a0;
+    --border: #333331;
+    --brand: #ff4d5e;
+    --brand-ink: #1a0004;
+    --brand-soft: #3a1418;
+    --ok: #5dd38a;
+    --ok-soft: #12301d;
+    --warn: #f5b74e;
+    --warn-soft: #33260f;
+    --bad: #ff7b72;
+    --bad-soft: #3a1513;
+    --chat-user: #e5e7eb;
+    --chart-bar: #4f8ae6;
+    --chart-hi: #f03a4c;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

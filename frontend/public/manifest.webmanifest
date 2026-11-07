@@ -1,0 +1,9 @@
+{
+  "name": "Accel Business · Udyam Digital",
+  "short_name": "Accel Business",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f6f4",
+  "theme_color": "#d6001c",
+  "icons": [{ "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }]
+}

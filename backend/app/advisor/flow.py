@@ -158,6 +158,8 @@ class Turn:
                 facts = {**llm_facts, **{k: v for k, v in facts.items() if k != "business_type_raw"}} if facts else llm_facts
                 if llm_facts.get("business_label"):
                     self.meta["business_label"] = llm_facts["business_label"]
+            if self.s["profile"].get("business_type") and expecting != "business_type":
+                facts.pop("business_type", None)  # an answer about internet must not rename the business
             if facts.get("business_type_raw") and "business_type" not in facts:
                 self.meta["business_label"] = facts["business_type_raw"]
             known_before = dict(self.s["profile"])

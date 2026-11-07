@@ -22,7 +22,7 @@ BUSINESS_KEYWORDS = [
     (r"stationery|स्टेशनरी", "Stationery shop"),
     (r"hardware|हार्डवेयर", "Hardware store"),
     (r"boutique|tailor|बुटीक|दर्ज़ी|दर्जी", "Boutique"),
-    (r"mobile (repair|shop)|phone repair|मोबाइल", "Mobile repair shop"),
+    (r"mobile (repair|shop)|phone repair|मोबाइल (रिपेयर|शॉप|की दुकान)", "Mobile repair shop"),
     (r"dental|dentist|दांत|डेंटल", "Dental clinic"),
     (r"diagnostic|pathology|\blab\b|लैब", "Diagnostic lab"),
     (r"physio|फिजियो", "Physiotherapy clinic"),
@@ -169,6 +169,16 @@ def parse(text: str, expecting: str | None = None) -> dict:
     m = re.search(NUM + r"\s*(shops|shop|branches|branch|outlets|outlet|stores|store|sites|site|locations|location|offices|office|centres|centre|clinics|factories|units|दुकानें|दुकान|ब्रांच)", low)
     if m:
         out["sites"] = _num(m)
+    if "sites" not in out:
+        # "3 bakeries", "3 बेकरी", "two clinics": a count right before a business noun is a site count
+        for m in re.finditer(NUM + r"\s+([^\s,।]+(?:\s+[^\s,।]+)?)", low):
+            noun = m.group(3)
+            if any(re.search(p, noun) for p, _ in BUSINESS_KEYWORDS) and not re.search(r"staff|employee|people|log|लोग", noun):
+                out["sites"] = _num(m)
+                break
+    m = re.search(r"(budget|बजट)\D{0,12}" + NUM, low)
+    if m:
+        out["budget"] = int(float(m.group(2).replace(",", "")) * (1000 if m.group(3) else 1))
     m = re.search(r"(₹|rs\.?|inr)\s*" + NUM + "|" + NUM + r"\s*(rupees|rs|₹|रुपये|रुपए)", low)
     if m:
         groups = [g for g in m.groups()]
@@ -176,9 +186,9 @@ def parse(text: str, expecting: str | None = None) -> dict:
         mult = 1000 if any(x in ("k", "हज़ार", "hazar", "hazaar", "thousand") for x in groups if x) else 1
         if val:
             amount = int(float(val.replace(",", "")) * mult)
-            if expecting == "budget" or re.search(r"budget|बजट", low):
+            if expecting == "budget":
                 out["budget"] = amount
-            else:
+            elif amount != out.get("budget"):
                 out["monthly_spend"] = amount
     m = re.search(NUM + r"\s*(cameras|camera|कैमरे|कैमरा)", low)
     if m:

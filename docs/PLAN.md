@@ -145,15 +145,15 @@ Funnel: 5,000 leads → 3,406 contacted → 1,974 needs assessed → 861 quote a
 
 ### Phase 1: Prototype
 
-- [ ] Repo scaffold: `backend/` (FastAPI) and `frontend/` (Next.js)
-- [ ] Load the CSVs into SQLite; mock GSTIN and Udyam lookup APIs
-- [ ] Rules engine: eligibility, dependencies, pricing, bundle tiers
-- [ ] Advisor: LLM tool-calling loop, multilingual prompts, voice input
-- [ ] Quote and checkout UI with add-on toggles
-- [ ] Smart KYC: consent screen, upload, extraction, validators; test against K01–K12
-- [ ] Order tracker
-- [ ] Back office: lead queue and propensity score
-- [ ] Test the advisor against self-written scenarios covering all segments, edge cases and no-GSTIN leads
+- [x] Repo scaffold: `backend/` (FastAPI) and `frontend/` (Next.js)
+- [x] Load the CSVs into SQLite; mock GSTIN and Udyam lookup APIs
+- [x] Rules engine: eligibility, dependencies, pricing, bundle tiers
+- [x] Advisor: LLM tool-calling loop, multilingual prompts, voice input
+- [x] Quote and checkout UI with add-on toggles
+- [x] Smart KYC: consent screen, upload, extraction, validators; test against K01–K12
+- [x] Order tracker
+- [x] Back office: lead queue and propensity score
+- [x] Test the advisor against self-written scenarios covering all segments, edge cases and no-GSTIN leads
 
 ### Phase 2: Submission materials
 
