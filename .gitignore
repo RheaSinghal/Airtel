@@ -17,3 +17,6 @@ out/
 # Secrets
 .env
 .env.local
+
+# Local scratch
+.scratch/
