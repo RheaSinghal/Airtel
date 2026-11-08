@@ -176,8 +176,8 @@ def cover(prs):
 
 def problem(prs, bg):
     s = new_content_slide(prs, bg)
-    s.title([[{"t": "Only 7.4% activate: the funnel leaks "}, {"t": "at the quote", "italic": True, "color": DEEP},
-              {"t": " and at the door"}]])
+    s.title([[{"t": "Only 7.4% activate: leads leak "}, {"t": "before the first call", "italic": True, "color": DEEP},
+              {"t": " and "}, {"t": "at the quote", "italic": True, "color": DEEP}]])
     # funnel
     stages = [("Leads", 5000, ""), ("Contacted", 3406, "68%"), ("Needs assessed", 1974, "58%"),
               ("Quote accepted", 861, "44%"), ("KYC complete", 588, "68%"), ("Activated", 368, "63%")]
@@ -225,13 +225,13 @@ def segments(prs, bg):
     s.title([[{"t": "Lead with professional offices; serve micro shops "}, {"t": "without a visit", "italic": True, "color": DEEP}]])
     segs = [
         ("1 · BEACHHEAD", "Professional offices", "25% of base · clinics, CA firms", "11.1% conversion · ₹10.7k CAC",
-         "100% self-serve", ["Biz Fibre 300", "Cloud Email ×5 + Backup 1 TB", "Endpoint Security ×5"], "₹4,712", "₹4,198 on 24 mo · ready in 5 days", True),
+         "100% self-serve", ["Biz Fibre 300", "Cloud Email ×5 + Backup 1 TB", "Endpoint Security ×5"], "₹4,712", "24-mo: ₹4,198 · ready in ~5 days", True),
         ("2 · VOLUME", "Micro retail & services", "55% of base · kirana, salon", "4.1% conversion · ₹20.0k CAC",
-         "Self-serve + partner assist", ["Biz Fibre 100 + Postpaid 299", "Cloud POS + WhatsApp Starter", "No GSTIN: Fibre 100 + POS, ₹2,476"], "₹4,440", "₹3,791 on 24 mo · ready in 5 days", False),
+         "Self-serve + partner assist", ["Biz Fibre 100 + Cloud POS", "No GSTIN needed, ≈ micro median", "+ SIM + WhatsApp: ₹4,440"], "₹2,476", "24-mo: ₹2,181 · ready in ~5 days", False),
         ("3 · VALUE", "Small multi-site", "15% of base · 3–10 outlets", "11.0% conv. · ₹28k median bill",
-         "Advisor → field sales", ["Per site: Fibre 300 + failover", "SD-WAN + CCTV + POS", "One bill for 4 outlets"], "₹34,904", "₹32,780 on 24 mo · 24-mo term", False),
+         "Advisor → field sales", ["Per site: Fibre 300 + failover", "SD-WAN + CCTV + POS", "One bill for 4 outlets"], "₹34,904", "24-mo: ₹32,780 · ready in ~14 days", False),
         ("4 · ASSISTED", "Small manufacturers", "5% of base · auto-parts, textile", "12.8% conversion · 8.1% churn",
-         "Advisor → field / partner", ["Leased Line 100", "Postpaid ×6 + Machine IoT ×5", "Endpoint Security"], "₹49,357", "₹48,384 on 24 mo · 24-mo term", False),
+         "Advisor → field / partner", ["Textile unit, 40 workers:", "Leased Line 100 + Machine IoT ×5", "Endpoint Security ×12"], "₹44,879", "24-mo: ₹44,525 · ready in ~30 days", False),
     ]
     for i, (eb, name, share, kpi, chan, items, price, sub, dark) in enumerate(segs):
         x = 0.45 + i * 2.32
@@ -268,16 +268,23 @@ def journey(prs, bg):
              ("quote.png", "02  Price", "One GST-inclusive monthly price. Toggle add-ons and 12/24/36 months; re-priced live, re-validated on order."),
              ("consent.png", "03  Verify", "DPDP consent read aloud, then a receipt. GSTIN lookup, OCR, DigiLocker and e-Sign; 12 of 12 specimen verdicts right."),
              ("tracker.png", "04  Track", "Dated stages from install times, a self-booked slot and WhatsApp updates instead of chase calls. One bill after.")]
+    # build-challenge checklist (case p.2): what judges score against, in one line
+    s.box(0.45, 1.34, 9.1, 0.27, fill=CREAM, radius=0.06, group=1)
+    s.text(0.6, 1.34, 8.85, 0.27, [[
+        {"t": "BUILT  ", "bold": True, "color": DEEP}, {"t": "✓ Advisor   ✓ Quote & checkout   ✓ Smart KYC   ✓ Tracker"},
+        {"t": "     STRETCH  ", "bold": True, "color": DEEP}, {"t": "✓ Voice & WhatsApp   ✓ Back-office   ✓ Propensity score"},
+        {"t": "     16/16 advisor test scenarios", "bold": True}]],
+        size=8, color=CHAR, anchor=MSO_ANCHOR.MIDDLE, group=1)
     for i, (img, head, fact) in enumerate(shots):
         cx = 0.45 + i * 2.3 + 1.1
-        h = 2.95
+        h = 2.72
         from PIL import Image
         iw, ih = Image.open(ASSETS / img).size
         w = h * iw / ih
-        s.box(cx - w / 2 - 0.06, 1.36, w + 0.12, h + 0.12, fill=CHAR, radius=0.14, group=1 + i)
-        s.image(ASSETS / img, cx - w / 2, 1.42, h=h, group=1 + i)
-        s.text(cx - 1.08, 4.47, 2.16, 0.22, head, size=11, font=HEAD, bold=False, color=DEEP, group=1 + i)
-        s.text(cx - 1.08, 4.68, 2.16, 0.45, fact, size=8, color=CHAR, group=1 + i)
+        s.box(cx - w / 2 - 0.06, 1.69, w + 0.12, h + 0.12, fill=CHAR, radius=0.14, group=2 + i)
+        s.image(ASSETS / img, cx - w / 2, 1.75, h=h, group=2 + i)
+        s.text(cx - 1.08, 4.53, 2.16, 0.2, head, size=11, font=HEAD, bold=False, color=DEEP, group=2 + i)
+        s.text(cx - 1.08, 4.73, 2.16, 0.4, fact, size=8, color=CHAR, group=2 + i)
     return s
 
 
@@ -286,11 +293,11 @@ def novelty(prs, bg):
     s.title([[{"t": "The LLM talks, code decides, and the field gets "}, {"t": "a better brief", "italic": True, "color": DEEP}]])
     cards = [
         ("N1", "Fact guard", "Every LLM sentence is checked against the engine's output; an untraced \u20b9 amount, product or \u201cdiscount\u201d falls back to the template.",
-         "After MEGHA (Harvard AI for Good 2025, 1st) and Padhai Check (MumbaiHacks 2025)."),
+         "Tested: invented prices (Hindi digits too), unlisted products and promos are blocked; the owner sees the engine's line."),
         ("N2", "Data passbook", "Consent receipt hashed to the exact notice, listen-aloud consent, and a log of every access. Zero photos stored; one tap withdraws.",
-         "After Sahamati's multilingual consent bot and Skippers (Gen AI Exchange 2025)."),
+         "Tested: receipt hash matches the notice shown, retention runs from activation, withdraw wipes the fields."),
         ("N3", "Recovery playbook", "Each lost lead gets an engine-priced offer and a call brief in the owner's language: re-quote, DigiLocker link or AirFiber, by drop reason.",
-         "After DreamOps (Warpspeed 2025, grand prize) and PitchLense (Gen AI Exchange 2025)."),
+         "Tested: every drop reason in smb_leads.csv maps to a play; every call-list row carries an engine-priced offer."),
     ]
     for i, (tag, name, body, src) in enumerate(cards):
         x = 0.45 + i * 3.07
@@ -308,9 +315,14 @@ def novelty(prs, bg):
             s.text(vx + 0.08, vy + 0.33, vw - 0.16, 0.29, [[{"t": "Owner sees: ", "bold": True}, {"t": "\u20b94,712/month incl. GST"},
                                                             {"t": "  \u2713 engine", "bold": True, "color": GREEN}]],
                    size=7.5, color=CHAR, anchor=MSO_ANCHOR.MIDDLE, group=g)
-        elif tag == "N2":  # the real passbook screen from the prototype
+        elif tag == "N2":  # receipt fields as the API returns them (order placed 8 Nov, live 14 Nov, as on slide 4)
             s.box(vx, vy, vw, vh, fill=WHITE, line=SAND, radius=0.05, group=g)
-            s.image(ASSETS / "passbook_strip.png", vx + (vw - vh * 716 / 190) / 2, vy, h=vh, group=g)
+            rows = [("Receipt", "CR-ORD-64BA6D17-C12E5904"), ("Purpose", "KYC verification only"),
+                    ("Kept until", "2027-05-13 · live + 180 days")]
+            for k, (lab, val) in enumerate(rows):
+                ry = vy + 0.05 + k * 0.18
+                s.text(vx + 0.1, ry, 0.7, 0.17, lab, size=7, color=MUTED, anchor=MSO_ANCHOR.MIDDLE, group=g)
+                s.text(vx + 0.8, ry, vw - 0.9, 0.17, val, size=7.5, color=CHAR, bold=k == 2, anchor=MSO_ANCHOR.MIDDLE, group=g)
         else:  # the engine-priced recovery offer
             s.box(vx, vy, vw, vh, fill=CHAR, radius=0.05, group=g)
             s.text(vx + 0.1, vy + 0.02, vw - 0.2, vh - 0.04,
@@ -318,7 +330,7 @@ def novelty(prs, bg):
                     [{"t": "\u20b93,679/mo", "font": HEAD, "size": 13, "color": SAFF}, {"t": "  \u20b91,033 less, same bundle", "color": "D8CFBF"}]],
                    size=7.5, color=CREAM, anchor=MSO_ANCHOR.MIDDLE, group=g)
         s.text(x + 0.16, 2.56, 2.65, 0.66, body, size=8.5, color=CHAR, group=g)
-        s.text(x + 0.16, 3.2, 2.65, 0.38, src, size=7, italic=True, color=MUTED, group=g)
+        s.text(x + 0.16, 3.2, 2.65, 0.38, src, size=7, italic=False, color=GREEN, group=g)
     # field force strip
     s.box(0.45, 3.72, 5.55, 1.33, fill=CHAR, group=4)
     s.text(0.62, 3.8, 5.2, 0.25, "FIELD FORCE AND PARTNERS: DIGITAL FEEDS THEM, NOT REPLACES THEM", size=8, bold=True, color=SAFF, group=4)
@@ -353,23 +365,34 @@ def architecture(prs, bg):
         g = 2 + ci
         s.text(x, 1.82, w, 0.2, head, size=8, bold=True, color=MUTED, group=g)
         n = len(items)
-        gap = 0.07
-        hh = (2.3 - gap * (n - 1)) / n
+        gap = 0.05
+        hh = (1.55 - gap * (n - 1)) / n
         for j, it in enumerate(items):
             y = 2.05 + j * (hh + gap)
             core = ci == 1 and it.startswith(("Rules", "N1"))
             s.box(x, y, w, hh, fill=SAFF if it.startswith("Rules") else (CREAM if not core else "FBE7D3"), group=g)
-            s.text(x + 0.08, y, w - 0.16, hh, it, size=8.5, color=CHAR, bold=core, anchor=MSO_ANCHOR.MIDDLE, group=g)
-    s.arrow(2.03, 3.2, 2.29, 3.2, group=3)
-    s.arrow(4.6, 3.2, 4.87, 3.2, group=4)
-    s.box(0.45, 4.47, 6.0, 0.58, fill="FBE7D3", group=5)
-    s.text(0.6, 4.47, 5.75, 0.58, [[{"t": "SCALES BY SWAPPING MOCKS FOR INDIA STACK RAILS", "bold": True, "size": 7.5, "color": DEEP}],
+            s.text(x + 0.08, y, w - 0.16, hh, it, size=8, color=CHAR, bold=core, anchor=MSO_ANCHOR.MIDDLE, group=g)
+    s.arrow(2.03, 2.82, 2.29, 2.82, group=3)
+    s.arrow(4.6, 2.82, 4.87, 2.82, group=4)
+    # numbered data flows (case p.3, item 2: "main components and data flows")
+    s.text(0.45, 3.66, 6.0, 0.16, "DATA FLOWS", size=8, bold=True, color=MUTED, group=5)
+    flows = [("1", "Advise", "chat or voice → NLU builds the profile → engine prices the bundle → fact guard checks the reply"),
+             ("2", "Verify", "consent receipt → OCR or DigiLocker → registry checks → verdict; photo dropped"),
+             ("3", "Track", "order → plan from catalogue install days → tracker and WhatsApp update at every stage"),
+             ("4", "Recover", "lost lead → propensity score + N3 engine-priced brief → back-office call list")]
+    for i, (num, name, what) in enumerate(flows):
+        fx, fy = 0.45 + (i % 2) * 3.05, 3.85 + (i // 2) * 0.31
+        s.box(fx, fy + 0.03, 0.2, 0.2, fill=SAFF, shape=MSO_SHAPE.OVAL, group=5)
+        s.text(fx, fy + 0.03, 0.2, 0.2, num, size=7.5, bold=True, color=CHAR, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, group=5)
+        s.text(fx + 0.26, fy, 2.7, 0.3, [[{"t": name + ": ", "bold": True}, {"t": what}]], size=7, color=CHAR, group=5)
+    s.box(0.45, 4.5, 6.0, 0.55, fill="FBE7D3", group=6)
+    s.text(0.6, 4.5, 5.75, 0.55, [[{"t": "SCALES BY SWAPPING MOCKS FOR INDIA STACK RAILS", "bold": True, "size": 7.5, "color": DEEP}],
                                    "Stateless API behind a load balancer \u00b7 Postgres with row-level security \u00b7 GSTN via a GSP \u00b7 "
                                    "DigiLocker & Aadhaar e-Sign \u00b7 Bhashini for 22 languages \u00b7 UPI AutoPay"],
-           size=8, color=CHAR, anchor=MSO_ANCHOR.MIDDLE, group=5)
+           size=7.5, color=CHAR, anchor=MSO_ANCHOR.MIDDLE, group=6)
     # privacy column
-    s.box(6.65, 1.36, 2.9, 3.69, fill=CREAM, group=6)
-    s.text(6.8, 1.46, 2.6, 0.3, "DPDP Act 2023, built in", size=13, font=HEAD, group=6)
+    s.box(6.65, 1.36, 2.9, 3.69, fill=CREAM, group=7)
+    s.text(6.8, 1.46, 2.6, 0.3, "DPDP Act 2023, built in", size=13, font=HEAD, group=7)
     s.text(6.8, 1.82, 2.62, 3.15, [
         [{"t": "Consent you can prove: ", "bold": True}, {"t": "receipt with notice hash, purpose, retention date."}],
         [{"t": "Purpose-limited: ", "bold": True}, {"t": "KYC only; never shared with partners or used for marketing."}],
@@ -378,7 +401,7 @@ def architecture(prs, bg):
         [{"t": "Transparent: ", "bold": True}, {"t": "owner sees every access; one tap withdraws and deletes."}],
         [{"t": "Accurate: ", "bold": True}, {"t": "checksum, registry status, cross-document and 90-day checks."}],
         [{"t": "AI-safe: ", "bold": True}, {"t": "the LLM never sets price or eligibility; the fact guard logs every blocked reply."}]],
-        size=8.5, color=CHAR, spacing=4.5, group=6)
+        size=8.5, color=CHAR, spacing=4.5, group=7)
     return s
 
 
@@ -391,12 +414,12 @@ def business(prs, bg):
             ("Days to activate", "17.6", "8.6", "≤ 9"),
             ("Status chases / customer", "3.0", "2.0", "≤ 1"),
             ("6-month churn", "15.2%", "14.3%", "≤ 10%")]
-    tbl = s.s.shapes.add_table(len(rows), 4, Inches(0.45), Inches(1.4), Inches(5.35), Inches(2.4)).table
+    tbl = s.s.shapes.add_table(len(rows), 4, Inches(0.45), Inches(1.4), Inches(5.35), Inches(2.16)).table
     widths = [2.15, 1.0, 1.1, 1.1]
     for i, w in enumerate(widths):
         tbl.columns[i].width = Inches(w)
     for r, row in enumerate(rows):
-        tbl.rows[r].height = Inches(0.4)
+        tbl.rows[r].height = Inches(0.36)
         for c, val in enumerate(row):
             cell = tbl.cell(r, c)
             cell.fill.solid()
@@ -415,13 +438,20 @@ def business(prs, bg):
             f.bold = r == 0 or c == 3
             f.color.rgb = rgb(CREAM if r == 0 else (GREEN if c == 2 else (DEEP if c == 3 else CHAR)))
     s.anim.append((1, tbl._graphic_frame))
-    s.text(0.45, 3.9, 5.35, 0.5, "*Impact simulator, conservative preset: each fix recovers a share of the exact drop reasons in "
-                                  "smb_leads.csv; recovered leads then convert at today's later-stage rates. Cohort ARR ₹18.5 cr → ₹39.6 cr per quarter of leads.",
-           size=8, color=MUTED, group=2)
-    s.box(0.45, 4.48, 5.35, 0.57, fill=CHAR, group=3)
-    s.text(0.6, 4.48, 5.1, 0.57, [[{"t": "Ask: ", "bold": True, "color": SAFF},
-                                   {"t": "a 3-month pilot with professional offices in Pune and Bengaluru, gated on ≥ 12% conversion and ≤ ₹6k CAC."}]],
-           size=9.5, color=CREAM, anchor=MSO_ANCHOR.MIDDLE, group=3)
+    s.text(0.45, 3.64, 5.35, 0.72, [
+        [{"t": "*Impact simulator, conservative preset: ", "bold": True},
+         {"t": "each fix recovers a share of the matching drop reasons in smb_leads.csv; recovered leads convert at today's "
+               "later-stage rates. Days = bundle install time + same-day KYC (today's 10–14 days include queueing)."}],
+        [{"t": "Targets: ", "bold": True},
+         {"t": "conversion and CAC are pilot gates set inside the conservative case; chases and churn are tracker goals "
+               "read from the data (1 chase → 5.9% churn)."}]],
+        size=7.5, color=MUTED, spacing=2, group=2)
+    s.box(0.45, 4.42, 5.35, 0.63, fill=CHAR, group=3)
+    s.text(0.6, 4.42, 5.1, 0.63, [[{"t": "Ask: ", "bold": True, "color": SAFF},
+                                   {"t": "a 3-month pilot with professional offices in Pune and Bengaluru, gated on ≥ 12% conversion and ≤ ₹6k CAC."}],
+                                  [{"t": "Prize: ", "bold": True, "color": SAFF},
+                                   {"t": "annual bundle revenue from 5,000 leads a quarter grows from ₹18.5 cr to ₹39.6 cr."}]],
+           size=8.5, color=CREAM, anchor=MSO_ANCHOR.MIDDLE, spacing=2, group=3)
     # rollout + risks
     s.text(6.05, 1.38, 3.5, 0.3, "Rollout", size=13, font=HEAD, group=4)
     phases = [("0–3 mo", "Pilot: professional offices, 2 tier-1 cities, web + WhatsApp, real GSTN via a GSP, DigiLocker."),

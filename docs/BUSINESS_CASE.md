@@ -16,9 +16,9 @@ Bundles are priced by the rules engine, include GST, and are the "Recommended" t
 | Priority | Segment | Why | Channel | Starter bundle | ₹/month (12 → 24 mo) | Ready |
 | --- | --- | --- | --- | --- | --- | --- |
 | **1. Beachhead** | Professional offices (25% of base) | Best conversion (11.1%) and lowest CAC (₹10.7k); medium price sensitivity; needs fit a standard bundle | 100% self-serve | Fibre 300 + Cloud Email ×5 + Backup 1 TB + Endpoint ×5 (CA firm, 8 staff) | 4,712 → 4,198 | 5 days |
-| **2. Volume** | Micro retail & services (55%) | Only viable without a visit: self-serve CAC ≈ website cost per lead | Self-serve + channel partner assist | Fibre 100 + Postpaid 299 + Cloud POS + WhatsApp Starter (with GSTIN) · no-GSTIN version: Fibre 100 + Cloud POS | 4,440 → 3,791 · 2,476 → 2,181 | 5 days |
+| **2. Volume** | Micro retail & services (55%) | Only viable without a visit: self-serve CAC ≈ website cost per lead | Self-serve + channel partner assist | **Starter, no GSTIN needed:** Fibre 100 + Cloud POS, priced at the micro median (₹2,470) · with GSTIN, add Postpaid 299 + WhatsApp Starter | 2,476 → 2,181 · 4,440 → 3,791 | 5 days |
 | 3. Value | Small multi-site (15%) | ₹28k median bundle, 10.8% churn; one bill and central management are the pain | Advisor → field sales handoff (≥ 6 sites always) | Per-site Fibre 300 + Failover + SD-WAN + CCTV + POS, one bill (4 outlets) | 34,904 → 32,780 | 14 days |
-| 4. Assisted | Small manufacturers (5%) | Highest conversion (12.8%), lowest churn (8.1%), complex needs | Advisor qualifies → field/partner | Leased Line 100 + Postpaid ×6 + Machine IoT ×5 + Endpoint (30 staff) | 49,357 → 48,384 | 30 days |
+| 4. Assisted | Small manufacturers (5%) | Highest conversion (12.8%), lowest churn (8.1%), complex needs | Advisor qualifies → field/partner | Leased Line 100 + Machine IoT ×5 + Endpoint ×12 (textile unit, 40 workers; QA scenario S06) | 44,879 → 44,525 | 30 days |
 
 Pricing rule (one sentence for owners): **commit longer, pay less.** The minimum contract sits at the top of the catalogue range, and each extra month moves linearly to the bottom at +24 months.
 
@@ -38,7 +38,9 @@ Each fix recovers a share of the exact drop reasons it addresses. Recovered lead
 | Status chases per customer | 3.0 | 2.0 | 1.5 | **≤ 1** |
 | 6-month churn | 15.2% | 14.3% | 10.1% | **≤ 10%** |
 
-On the same 5,000 leads a quarter, the conservative case gives 780 activations instead of 368, and the annualised bundle value of the cohort rises from ₹18.5 cr to ₹39.6 cr.
+On the same 5,000 leads a quarter, the conservative case gives 780 activations instead of 368, and the annualised bundle value (four such quarters) rises from ₹18.5 cr to ₹39.6 cr.
+
+Targets are set two ways. Conversion and CAC are **pilot gates** set inside the conservative case, so missing them means the model is wrong. Status chases and churn are **tracker goals** read from the data: 1 chase goes with 5.9% churn. Days to activate = the slowest install in the bundle + 1 day, because KYC and e-sign are same-day. Today's 10–14 days include queueing.
 
 ## 5. Rollout
 1. **Pilot (months 0–3):** professional offices in 2 tier-1 cities (Pune, Bengaluru), self-serve web + WhatsApp, real GSTN lookup via a GSP, DigiLocker. Gate: ≥ 12% conversion and ≤ ₹6k CAC on pilot leads.
