@@ -12,8 +12,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from . import store
-from .data import SEGMENT_CODES, SEGMENT_NAMES, gstin_registry, leads
+from . import recovery, store
+from .data import SEGMENT_CODES, SEGMENT_NAMES, catalogue, gstin_registry, leads
+from .engine.profile import BusinessProfile
 
 CAT = ["segment", "lead_source", "city_tier", "has_gstin", "has_udyam", "annual_turnover_band", "current_internet"]
 NUMERIC = ["log_employees", "num_sites", "log_spend", "n_interest"]
@@ -132,6 +133,7 @@ def queue() -> list[dict]:
             "offer_monthly": (tier.get("totals") or {}).get("monthly_total"),
             "owner": suggested_owner(p), "partner_id": s.get("partner_id"), **sc,
         })
+        items[-1]["recovery"] = _safe_playbook(p, items[-1]["reason"], s.get("lang"), s.get("partner_id"))
     for o in store.select("orders", "status = 'kyc_action_needed'", order="updated DESC"):
         p = o.get("profile") or {}
         sc = score_profile(p, "Advisor")
@@ -143,6 +145,7 @@ def queue() -> list[dict]:
             "offer_monthly": o["quote"]["totals"]["monthly_total"], "owner": "telesales",
             "kyc_issues": [c["message"] for c in (o.get("kyc") or {}).get("checks", []) if c["status"] == "fail"], **sc,
         })
+        items[-1]["recovery"] = _safe_playbook(p, "kyc_failed", o.get("lang"))
     return sorted(items, key=lambda i: -i["score"])
 
 
@@ -151,13 +154,31 @@ def historical_call_list(limit: int = 50) -> list[dict]:
     df = leads()
     dropped = df[(df.outcome == "Dropped") & df.drop_reason.isin([
         "Unreachable after 3 attempts", "Owner had no time for a visit", "Visit not scheduled by sales",
-        "Quote took too long to arrive", "Quote too complex to understand", "Found paperwork too long", "Decided to wait"])]
+        "Quote took too long to arrive", "Quote too complex to understand", "Found paperwork too long", "Decided to wait",
+        "Price too high", "Competitor offered cheaper plan", "Missing GST or Udyam document", "Site not feasible for fibre",
+        "Installation delayed beyond 21 days", "Only wanted a mobile plan", "First payment failed"])]
     s = score_frame(dropped).sort_values("score", ascending=False).head(limit)
     return [{"lead_id": r.lead_id, "business": r.business_name, "business_type": r.business_type,
              "segment": SEGMENT_CODES[r.segment], "city": r.city, "source": r.lead_source,
              "drop_reason": r.drop_reason, "score": int(r.score), "expected_activation": r.expected_activation,
-             "owner": suggested_owner({"segment": SEGMENT_CODES[r.segment], "sites": r.num_sites})}
+             "language": r.preferred_language,
+             "owner": suggested_owner({"segment": SEGMENT_CODES[r.segment], "sites": r.num_sites}),
+             "recovery": recovery.playbook(recovery.profile_from_lead(r), r.drop_reason, r.preferred_language)}
             for r in s.itertuples(index=False)]
+
+
+LANG_NAME = {v: k for k, v in recovery.LANG_CODE.items()}
+
+
+def _safe_playbook(p: dict, reason: str, lang: str | None, partner_id: str | None = None) -> dict | None:
+    """N3: engine-priced recovery offer + call brief; None if the profile is too thin to price."""
+    try:
+        prof = BusinessProfile(**{k: v for k, v in p.items() if k in BusinessProfile.model_fields})
+        if not prof.needs:
+            prof.needs = ["internet"]
+        return recovery.playbook(prof, reason, LANG_NAME.get(lang or "en", "English"), partner_id)
+    except Exception:
+        return None
 
 
 @lru_cache
@@ -196,5 +217,47 @@ def insights() -> dict:
         "follow_up_vs_churn": [{"calls": int(r.customer_follow_up_calls), "customers": int(r.n),
                                 "churn_6m": round(float(r.churn), 3), "nps": round(float(r.nps), 1)} for r in calls.itertuples()],
         "activated_on_inactive_gstin": int(gst_bad.status.isin(["Cancelled", "Suspended"]).sum()),
+        "audit": audit(),
         "model": {"auc": model()["auc"], "drivers": model()["drivers"]},
     }
+
+
+@lru_cache
+def audit() -> dict:
+    """D4: historical activations that break the catalogue rules or the GST registry.
+
+    The same checks the engine and Smart KYC now enforce up front, run backwards over the quarter.
+    """
+    df = leads()
+    act = df[df.outcome == "Activated"]
+    cat = catalogue()
+    reg = gstin_registry()
+    found = {"inactive_gstin": [], "gstin_product_without_gstin": [], "city_tier": [], "min_employees": [],
+             "min_sites": [], "missing_dependency": []}
+    for r in act.itertuples(index=False):
+        items = [x.split("x")[0] for x in str(r.bundle_products).split(";") if x]
+        status = (reg.get(r.gstin) or {}).get("status") if isinstance(r.gstin, str) else None
+        if status in ("Cancelled", "Suspended"):
+            found["inactive_gstin"].append(r.lead_id)
+        for pid in items:
+            prod = cat[pid]
+            if prod.requires_gstin and r.has_gstin != "Y":
+                found["gstin_product_without_gstin"].append(r.lead_id)
+            if int(r.city_tier) not in prod.city_tiers:
+                found["city_tier"].append(r.lead_id)
+            if int(r.employee_count) < prod.min_employees:
+                found["min_employees"].append(r.lead_id)
+            if int(r.num_sites) < prod.min_sites:
+                found["min_sites"].append(r.lead_id)
+            if prod.requires_one_of and not set(prod.requires_one_of) & set(items):
+                found["missing_dependency"].append(r.lead_id)
+    labels = {"inactive_gstin": "Activated on a cancelled or suspended GSTIN",
+              "gstin_product_without_gstin": "GSTIN-only product sold without a GSTIN",
+              "city_tier": "Product not sold in the customer's city tier",
+              "min_employees": "Below the product's minimum employees",
+              "min_sites": "Below the product's minimum sites",
+              "missing_dependency": "Product sold without the product it depends on"}
+    checks = [{"check": k, "label": labels[k], "violations": len(v), "leads": sorted(set(v))[:10],
+               "distinct_leads": len(set(v))} for k, v in found.items()]
+    flagged = set().union(*found.values())
+    return {"activations": len(act), "flagged_activations": len(flagged), "checks": checks}
