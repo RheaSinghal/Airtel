@@ -8,6 +8,7 @@ from ..config import CONSENT_VERSION, KYC_RETENTION_DAYS, TODAY
 from ..data import gstin_registry, udyam_registry
 from .identifiers import mask_gstin, mask_id, mask_udyam, validate_gstin, validate_udyam
 from .ocr import BLUR_THRESHOLD, read
+from . import passbook
 from .parse import DOC_TYPES, classify, extract
 from .validate import verify
 
@@ -51,8 +52,11 @@ def consent_text(lang: str) -> dict:
 
 
 def record_consent(order_id: str, accepted: bool, lang: str) -> dict:
-    consent = {"version": CONSENT_VERSION, "accepted": accepted, "at": store.now(), "lang": lang,
+    at = store.now()
+    consent = {"version": CONSENT_VERSION, "accepted": accepted, "at": at, "lang": lang,
                "purposes": ["kyc_verification"], "withdrawn_at": None}
+    if accepted:  # N2: the owner keeps a receipt tied to the exact notice they saw
+        consent["receipt"] = passbook.receipt(order_id, consent_text(lang), lang, at, retention_until())
     store.update("orders", {"id": order_id}, {"consent": consent, "updated": store.now()})
     store.log(order_id, "consent", {"accepted": accepted, "version": CONSENT_VERSION})
     return consent

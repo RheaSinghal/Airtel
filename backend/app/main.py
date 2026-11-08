@@ -17,7 +17,7 @@ from .engine.pricing import CONTRACT_OPTIONS, quote
 from .engine.profile import BusinessProfile
 from .engine.rules import check_bundle
 from .i18n import LANGS, block_text
-from .kyc import digilocker
+from .kyc import digilocker, passbook
 from .kyc import service as kyc
 from .kyc.parse import DOC_TYPES
 
@@ -291,6 +291,12 @@ def verify_kyc(oid: str, body: VerifyRequest):
         b["message"] = f"{catalogue()[b['product_id']].name}: {block_text(b, o['lang'])}"
     result["blocked_products"] = blocked
     return {**result, "order": _public_order(store.get("orders", id=oid))}
+
+
+@app.get("/api/orders/{oid}/passbook")
+def data_passbook(oid: str):
+    """N2: consent receipt + every access to the owner's KYC data."""
+    return passbook.view(_order_or_404(oid))
 
 
 @app.post("/api/orders/{oid}/consent/withdraw")

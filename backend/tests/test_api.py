@@ -224,3 +224,23 @@ def test_coverage_replans_to_airfiber(client):
     ids = {l["product_id"] for l in offer["tiers"][offer["default"]]["lines"]}
     assert "P04" in ids and "P01" not in ids and "P23" in ids  # CCTV still valid on AirFiber
     assert client.get("/api/feasibility?pin=12").json()["valid"] is False
+
+
+def test_data_passbook_receipt_and_access_log(client):
+    """N2: consent issues a receipt tied to the notice hash; every access shows in the owner's log."""
+    from app.kyc import passbook
+    from app.kyc.service import consent_text
+    oid = _order(client)["id"]
+    c = client.post(f"/api/orders/{oid}/consent", json={"accepted": True}).json()
+    rec = c["receipt"]
+    assert rec["notice_sha256"] == passbook.notice_hash(consent_text("en"))
+    assert rec["receipt_id"].startswith(f"CR-{oid}-") and rec["retained_until"]
+    client.post(f"/api/orders/{oid}/documents/gst_certificate/sample/K03")
+    pb = client.get(f"/api/orders/{oid}/passbook").json()
+    assert pb["status"] == "active" and pb["documents_stored"] == 0
+    events = [e["event"] for e in pb["access_log"]]
+    assert events[:2] == ["consent", "document_uploaded"]
+    assert all("gstin" not in str(e).lower() or "*" in str(e) for e in pb["access_log"])
+    client.post(f"/api/orders/{oid}/consent/withdraw")
+    pb = client.get(f"/api/orders/{oid}/passbook").json()
+    assert pb["status"] == "withdrawn" and pb["fields_stored"] == [] and pb["access_log"][-1]["event"] == "consent_withdrawn"

@@ -135,6 +135,7 @@ def queue() -> list[dict]:
     for o in store.select("orders", "status = 'kyc_action_needed'", order="updated DESC"):
         p = o.get("profile") or {}
         sc = score_profile(p, "Advisor")
+        store.log(o["id"], "backoffice_viewed", {"fields": ["kyc_issues"]})  # shown in the owner's passbook
         items.append({
             "kind": "order", "id": o["id"], "updated": o["updated"], "stage": o["status"], "reason": "kyc_failed",
             "business": p.get("business_type"), "city": p.get("city"), "segment": p.get("segment"),
