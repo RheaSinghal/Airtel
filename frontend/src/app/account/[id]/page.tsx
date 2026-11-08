@@ -42,7 +42,7 @@ function Account() {
     <>
       <Header lang={lang} setLang={setLang} title="My business account" backHref={`/order/${id}`} />
       <main className="mx-auto w-full max-w-2xl flex-1 space-y-4 px-4 py-4 pb-16">
-        <section className="rounded-2xl border border-border bg-surface p-4">
+        <section className="rounded-[20px] border border-border bg-surface p-4">
           <p className="text-sm text-muted">
             {order.profile.business_type} · {order.profile.city}
           </p>
@@ -62,9 +62,9 @@ function Account() {
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-border bg-surface p-4">
+        <section className="rounded-[20px] border border-border bg-surface p-4">
           <div className="flex items-baseline justify-between">
-            <h2 className="font-semibold">Bill · {bill.period}</h2>
+            <h2 className="text-[22px]">Bill · {bill.period}</h2>
             <span className="text-xs text-muted">due {new Date(bill.due_date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
           </div>
           <ul className="mt-2 divide-y divide-border text-sm">
@@ -87,7 +87,7 @@ function Account() {
             {paid ? (
               <span className="rounded-xl bg-ok-soft px-4 py-2.5 text-sm font-semibold text-ok">✓ Paid via UPI</span>
             ) : (
-              <a href={bill.upi_link} onClick={() => setPaid(true)} className="rounded-xl bg-brand px-5 py-2.5 font-semibold text-brand-ink">
+              <a href={bill.upi_link} onClick={() => setPaid(true)} className="rounded-full bg-foreground px-5 py-2.5 font-semibold text-background">
                 Pay with UPI
               </a>
             )}
@@ -95,8 +95,8 @@ function Account() {
           <p className="mt-1 text-xs text-muted">GST invoice for input tax credit is emailed with every bill. UPI AutoPay available.</p>
         </section>
 
-        <section className="rounded-2xl border border-border bg-surface p-4">
-          <h2 className="font-semibold">Need help?</h2>
+        <section className="rounded-[20px] border border-border bg-surface p-4">
+          <h2 className="text-[22px]">Need help?</h2>
           <p className="text-sm text-muted">One place for every service. Describe it in your own words; we route it to the right team.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {Object.entries(cats).map(([k, label]) => (

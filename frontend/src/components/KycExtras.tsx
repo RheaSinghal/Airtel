@@ -27,18 +27,18 @@ export function DigiLockerCard({ orderId, gstin, onFetched }: { orderId: string;
   };
 
   if (step === "done") {
-    return <p className="rounded-2xl bg-ok-soft p-4 text-sm text-ok">✓ {summary}</p>;
+    return <p className="rounded-[20px] bg-ok-soft p-4 text-sm text-ok">✓ {summary}</p>;
   }
 
   return (
-    <section className="rounded-2xl border-2 border-brand bg-brand-soft/40 p-4">
+    <section className="rounded-[20px] border-2 border-foreground bg-brand-soft/40 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-semibold">⚡ Fastest: fetch from DigiLocker</p>
           <p className="text-sm text-muted">Issuer-verified GST, Udyam and e-KYC in about 30 seconds. No photos needed.</p>
         </div>
         {step === "idle" && (
-          <button onClick={() => setStep("mobile")} className="shrink-0 rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-brand-ink">
+          <button onClick={() => setStep("mobile")} className="shrink-0 rounded-full bg-foreground px-3 py-2 text-sm font-semibold text-background">
             Use DigiLocker
           </button>
         )}
@@ -124,7 +124,7 @@ export function DigiLockerCard({ orderId, gstin, onFetched }: { orderId: string;
               placeholder="GSTIN"
               className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 font-mono"
             />
-            <button disabled={busy || g.length < 15} className="rounded-lg bg-brand px-4 font-semibold text-brand-ink disabled:opacity-40">
+            <button disabled={busy || g.length < 15} className="rounded-full bg-foreground px-4 font-semibold text-background disabled:opacity-40">
               Fetch
             </button>
           </div>
@@ -144,11 +144,11 @@ export function ESignCard({ orderId, signed, onSigned }: { orderId: string; sign
   const [done, setDone] = useState(signed);
 
   if (done) {
-    return <p className="rounded-2xl bg-ok-soft p-4 text-sm text-ok">✓ Agreement e-signed. A copy is on its way to you on WhatsApp.</p>;
+    return <p className="rounded-[20px] bg-ok-soft p-4 text-sm text-ok">✓ Agreement e-signed. A copy is on its way to you on WhatsApp.</p>;
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-surface p-4">
+    <section className="rounded-[20px] border border-border bg-surface p-4">
       <p className="font-semibold">Sign your agreement</p>
       <p className="text-sm text-muted">Aadhaar OTP e-Sign: legally valid, no printing or couriers.</p>
       {!doc ? (
@@ -204,7 +204,7 @@ export function ESignCard({ orderId, signed, onSigned }: { orderId: string; sign
               placeholder={`Aadhaar OTP (demo ${doc.demo_otp})`}
               className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 tracking-widest"
             />
-            <button className="rounded-lg bg-brand px-4 font-semibold text-brand-ink">Sign</button>
+            <button className="rounded-full bg-foreground px-4 font-semibold text-background">Sign</button>
           </form>
         </>
       )}

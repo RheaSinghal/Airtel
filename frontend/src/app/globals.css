@@ -1,24 +1,27 @@
 @import "tailwindcss";
 
+/* Tokens: docs/DESIGN.md §2. Cream, charcoal, saffron. */
 :root {
-  --background: #f6f6f4;
-  --surface: #ffffff;
-  --surface-2: #f1f0ed;
-  --foreground: #1a1a1a;
-  --muted: #6b6b66;
-  --border: #e4e2dc;
-  --brand: #d6001c;
-  --brand-ink: #ffffff;
-  --brand-soft: #fdecee;
-  --ok: #157f3b;
-  --ok-soft: #e7f5ec;
-  --warn: #9a5b00;
-  --warn-soft: #fff4e0;
-  --bad: #b3261e;
-  --bad-soft: #fdecea;
-  --chat-user: #1f2937;
-  --chart-bar: #2f6bc4;
-  --chart-hi: #d6001c;
+  --background: #f6f1e7;
+  --surface: #fffdf8;
+  --surface-2: #ede6d6;
+  --foreground: #1f1d1a;
+  --muted: #6b655b;
+  --border: #e2d9c6;
+  --brand: #c2410c;
+  --brand-ink: #fffdf8;
+  --brand-soft: #fbe7d3;
+  --saffron: #f29a4a;
+  --ok: #2f6b3f;
+  --ok-soft: #e3efe3;
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d9;
+  --bad: #a8322a;
+  --bad-soft: #f7e1de;
+  --chat-user: #1f1d1a;
+  --chart-bar: #cfc4ad;
+  --chart-hi: #f29a4a;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 @theme inline {
@@ -31,6 +34,7 @@
   --color-brand: var(--brand);
   --color-brand-ink: var(--brand-ink);
   --color-brand-soft: var(--brand-soft);
+  --color-saffron: var(--saffron);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-warn: var(--warn);
@@ -38,39 +42,117 @@
   --color-bad: var(--bad);
   --color-bad-soft: var(--bad-soft);
   --color-chat-user: var(--chat-user);
-  --font-sans: var(--font-noto), var(--font-noto-deva), system-ui, sans-serif;
+  --font-sans: var(--font-dm), var(--font-noto-deva), system-ui, sans-serif;
+  --font-display: var(--font-instrument), Georgia, serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #121212;
-    --surface: #1c1c1c;
-    --surface-2: #262626;
-    --foreground: #f2f2f0;
-    --muted: #a3a3a0;
-    --border: #333331;
-    --brand: #ff4d5e;
-    --brand-ink: #1a0004;
-    --brand-soft: #3a1418;
-    --ok: #5dd38a;
-    --ok-soft: #12301d;
-    --warn: #f5b74e;
-    --warn-soft: #33260f;
-    --bad: #ff7b72;
-    --bad-soft: #3a1513;
-    --chat-user: #e5e7eb;
-    --chart-bar: #4f8ae6;
-    --chart-hi: #f03a4c;
+    --background: #171512;
+    --surface: #211e1a;
+    --surface-2: #2b2722;
+    --foreground: #f3ede2;
+    --muted: #ada597;
+    --border: #3a352e;
+    --brand: #f0a35e;
+    --brand-ink: #171512;
+    --brand-soft: #3a2716;
+    --saffron: #f0a35e;
+    --ok: #7fcb92;
+    --ok-soft: #16301e;
+    --warn: #f2c46b;
+    --warn-soft: #33280f;
+    --bad: #ff8a80;
+    --bad-soft: #3a1714;
+    --chat-user: #f3ede2;
+    --chart-bar: #4a4339;
+    --chart-hi: #f0a35e;
   }
+}
+
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  line-height: 1.55;
   -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, .font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--saffron);
+  outline-offset: 2px;
+}
+
+button:not(:disabled):active,
+a:active {
+  transform: scale(0.98);
+}
+
+button,
+a,
+input,
+select {
+  transition: background-color 200ms var(--ease), border-color 200ms var(--ease), color 200ms var(--ease),
+    transform 120ms var(--ease);
+}
+
+/* DESIGN.md §15: fade and rise on enter, staggered. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 320ms var(--ease) both;
+}
+
+.rise-1 { animation-delay: 40ms; }
+.rise-2 { animation-delay: 80ms; }
+.rise-3 { animation-delay: 120ms; }
+.rise-4 { animation-delay: 160ms; }
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+  }
+  button:active,
+  a:active {
+    transform: none;
+  }
+  .rise {
+    animation: none;
+  }
 }

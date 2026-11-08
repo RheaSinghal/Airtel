@@ -51,13 +51,13 @@ export default function ImpactPage() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
           <div className="flex items-center gap-3">
             <Logo />
-            <span className="rounded-md bg-surface-2 px-2 py-0.5 text-xs text-muted">Impact simulator</span>
+            <span className="hidden rounded-full bg-surface-2 px-2.5 py-0.5 text-xs text-muted sm:inline">Impact simulator</span>
           </div>
-          <div className="flex gap-1 rounded-lg border border-border p-0.5 text-sm" role="group" aria-label="Preset">
+          <div className="flex gap-1 rounded-full border border-border p-0.5 text-sm" role="group" aria-label="Preset">
             {Object.keys(res.presets).map((p) => (
               <button
                 key={p}
@@ -65,7 +65,7 @@ export default function ImpactPage() {
                   setPreset(p);
                   setState(res.presets[p]);
                 }}
-                className={`rounded-md px-2.5 py-1 capitalize ${preset === p ? "bg-foreground text-background" : "text-muted"}`}
+                className={`rounded-full px-3 py-1.5 capitalize ${preset === p ? "bg-foreground text-background" : "text-muted"}`}
               >
                 {p}
               </button>
@@ -75,8 +75,8 @@ export default function ImpactPage() {
       </header>
 
       <main className="mx-auto grid w-full max-w-6xl flex-1 gap-5 px-4 py-5 lg:grid-cols-[minmax(0,22rem)_1fr]">
-        <section className="space-y-4 rounded-2xl border border-border bg-surface p-4 lg:sticky lg:top-20 lg:self-start">
-          <h2 className="font-semibold">What the digital journey fixes</h2>
+        <section className="space-y-4 rounded-[20px] border border-border bg-surface p-4 lg:sticky lg:top-20 lg:self-start">
+          <h2 className="text-[22px]">What the digital journey fixes</h2>
           <p className="text-xs text-muted">Share of each drop reason we recover. Every number is computed from the 5,000 leads in smb_leads.csv.</p>
           {res.levers.map((l) => (
             <label key={l.key} className="block text-sm">

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Bars } from "@/components/Bars";
 import { Logo } from "@/components/Header";
-import { api, inr, type CallItem, type Insights, type QueueItem, type ScenarioRun } from "@/lib/api";
+import { api, inr, type CallItem, type Insights, type QueueItem, type Recovery, type ScenarioRun } from "@/lib/api";
 
 const TABS = ["Queue", "Orders", "Call-back list", "Insights", "Advisor QA"] as const;
 type Tab = (typeof TABS)[number];
@@ -59,17 +59,17 @@ export default function BackOffice() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
           <div className="flex items-center gap-3">
             <Logo />
-            <span className="rounded-md bg-surface-2 px-2 py-0.5 text-xs text-muted">Back-office</span>
+            <span className="hidden rounded-full bg-surface-2 px-2.5 py-0.5 text-xs text-muted sm:inline">Back-office</span>
           </div>
           <div className="flex gap-2">
-            <Link href="/impact" className="rounded-lg bg-foreground px-3 py-1.5 text-sm text-background">
-              Impact simulator
+            <Link href="/impact" className="inline-flex h-10 items-center rounded-full bg-foreground px-4 text-sm font-medium text-background">
+              Impact
             </Link>
-            <button onClick={load} className="rounded-lg border border-border px-3 py-1.5 text-sm">
+            <button onClick={load} className="h-10 rounded-full border border-foreground px-4 text-sm font-medium">
               Refresh
             </button>
           </div>
@@ -81,10 +81,10 @@ export default function BackOffice() {
               role="tab"
               aria-selected={tab === t}
               onClick={() => setTab(t)}
-              className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm ${tab === t ? "border-brand font-semibold" : "border-transparent text-muted"}`}
+              className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm ${tab === t ? "border-foreground font-semibold" : "border-transparent text-muted"}`}
             >
               {t}
-              {t === "Queue" && queue.length > 0 && <span className="ml-1.5 rounded-full bg-brand px-1.5 text-xs text-brand-ink">{queue.length}</span>}
+              {t === "Queue" && queue.length > 0 && <span className="ml-1.5 rounded-full bg-foreground px-1.5 text-xs text-background">{queue.length}</span>}
             </button>
           ))}
         </nav>
@@ -134,6 +134,7 @@ export default function BackOffice() {
                               {k}
                             </p>
                           ))}
+                          <RecoveryBrief r={q.recovery} />
                         </td>
                         <td className="px-3 py-2 tabular">{q.offer_monthly ? inr(q.offer_monthly) : "–"}</td>
                         <td className="px-3 py-2">{q.partner_id ? `Partner ${q.partner_id}` : OWNER[q.owner]}</td>
@@ -207,8 +208,8 @@ export default function BackOffice() {
         {tab === "Call-back list" && (
           <section>
             <p className="mb-3 text-sm text-muted">
-              Historical leads dropped for fixable reasons (unreachable, slow quote, paperwork), ranked by the propensity model. Hand these to
-              field sales or partners first.
+              Historical leads dropped for fixable reasons, ranked by the propensity model. Each comes with a recovery offer priced by
+              the rules engine and a call brief in the owner&apos;s language, so a rep can never promise a price the engine wouldn&apos;t give.
             </p>
             <div className="overflow-x-auto rounded-xl border border-border bg-surface">
               <table className="w-full text-sm">
@@ -233,7 +234,10 @@ export default function BackOffice() {
                           {c.lead_id} · {c.business_type} · {c.city}
                         </p>
                       </td>
-                      <td className="px-3 py-2">{c.drop_reason}</td>
+                      <td className="px-3 py-2">
+                        {c.drop_reason}
+                        <RecoveryBrief r={c.recovery} />
+                      </td>
                       <td className="px-3 py-2">{c.source}</td>
                       <td className="px-3 py-2">{OWNER[c.owner]}</td>
                     </tr>
@@ -255,7 +259,7 @@ export default function BackOffice() {
               ].map(([k, v]) => (
                 <div key={k} className="rounded-xl border border-border bg-surface p-4">
                   <p className="text-xs text-muted">{k}</p>
-                  <p className="text-2xl font-bold tabular">{v}</p>
+                  <p className="font-display text-[32px] tabular">{v}</p>
                 </div>
               ))}
             </div>
@@ -313,6 +317,31 @@ export default function BackOffice() {
               </div>
             </div>
 
+            {ins.audit && (
+              <div className="rounded-[20px] border border-border bg-surface p-5">
+                <p className="eyebrow">Leads audit · rules the old process broke</p>
+                <p className="mt-1 font-display text-[40px] leading-tight tabular">
+                  {ins.audit.flagged_activations} <span className="text-[22px] text-muted">of {ins.audit.activations} activations</span>
+                </p>
+                <p className="mb-3 text-sm text-muted">
+                  broke a catalogue or GST rule. The rules engine and Smart KYC now enforce every one of these before an order is placed.
+                </p>
+                <ul className="divide-y divide-border text-sm">
+                  {ins.audit.checks
+                    .filter((c) => c.violations > 0)
+                    .map((c) => (
+                      <li key={c.check} className="flex items-baseline justify-between gap-3 py-2">
+                        <span>
+                          {c.label}
+                          <span className="block text-xs text-muted">{c.leads.slice(0, 4).join(", ")}…</span>
+                        </span>
+                        <span className="tabular font-semibold">{c.distinct_leads}</span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
+
             <div className="overflow-x-auto rounded-xl border border-border bg-surface">
               <table className="w-full text-sm">
                 <thead className="bg-surface-2 text-left text-xs text-muted">
@@ -346,15 +375,16 @@ export default function BackOffice() {
         {tab === "Advisor QA" && !qa && <p className="text-muted">Running scenarios…</p>}
         {tab === "Advisor QA" && qa && (
           <section className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
                 ["Scenarios passing", `${qa.passed} / ${qa.total}`],
                 ["Avg. turns to a bundle", String(qa.avg_turns)],
                 ["Rule violations", String(qa.results.filter((r) => r.failures.some((f) => f.includes("breaks rules"))).length)],
+                ["LLM replies blocked by fact guard", qa.fact_guard ? `${qa.fact_guard.blocked} / ${qa.fact_guard.checked}` : "0 / 0"],
               ].map(([k, v]) => (
                 <div key={k} className="rounded-xl border border-border bg-surface p-4">
                   <p className="text-xs text-muted">{k}</p>
-                  <p className="text-2xl font-bold tabular">{v}</p>
+                  <p className="font-display text-[32px] tabular">{v}</p>
                 </div>
               ))}
             </div>
@@ -395,5 +425,23 @@ export default function BackOffice() {
         )}
       </main>
     </>
+  );
+}
+
+function RecoveryBrief({ r }: { r?: Recovery | null }) {
+  if (!r) return null;
+  return (
+    <details className="mt-2 rounded-xl bg-brand-soft/60 p-2 text-xs">
+      <summary className="cursor-pointer font-semibold text-brand">
+        {r.action}
+        {r.offer ? ` · ${inr(r.offer.monthly_total)}/mo, ${r.offer.contract_months} mo` : ""}
+      </summary>
+      <ol className="mt-2 space-y-1">
+        {r.brief.map((b, i) => (
+          <li key={i}>{b}</li>
+        ))}
+      </ol>
+      {r.offer && <p className="mt-2 text-muted">{r.offer.products.join(" · ")}</p>}
+    </details>
   );
 }

@@ -146,14 +146,14 @@ function Advisor() {
             if (m.role === "user") {
               return (
                 <div key={i} className="flex justify-end">
-                  <p className="max-w-[85%] rounded-2xl rounded-br-sm bg-chat-user px-4 py-2.5 text-background">{m.text}</p>
+                  <p className="max-w-[85%] rounded-[20px] rounded-br-sm bg-chat-user px-4 py-2.5 text-background">{m.text}</p>
                 </div>
               );
             }
             return (
               <div key={i} className="space-y-2">
                 {m.text && (
-                  <p className="max-w-[90%] whitespace-pre-line rounded-2xl rounded-bl-sm border border-border bg-surface px-4 py-2.5">
+                  <p className="max-w-[90%] whitespace-pre-line rounded-[20px] rounded-bl-sm border border-border bg-surface px-4 py-2.5">
                     {m.text}
                   </p>
                 )}
@@ -177,7 +177,7 @@ function Advisor() {
                           aria-pressed={m.multi ? selected : undefined}
                           className={`rounded-full border px-3.5 py-2 text-sm transition ${
                             c.primary
-                              ? "border-brand bg-brand font-semibold text-brand-ink"
+                              ? "border-foreground bg-foreground font-semibold text-background"
                               : selected
                                 ? "border-foreground bg-foreground text-background"
                                 : "border-border bg-surface hover:border-foreground"
@@ -212,7 +212,7 @@ function Advisor() {
                 onClick={mic}
                 aria-label="Speak"
                 className={`grid h-11 w-11 shrink-0 place-items-center rounded-full border ${
-                  listening ? "animate-pulse border-brand bg-brand text-brand-ink" : "border-border bg-surface"
+                  listening ? "animate-pulse border-foreground bg-foreground text-background" : "border-border bg-surface"
                 }`}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -228,7 +228,7 @@ function Advisor() {
               className="h-11 min-w-0 flex-1 rounded-full border border-border bg-surface px-4"
               aria-label={t(lang, "typeMessage")}
             />
-            <button disabled={busy || !input.trim()} className="h-11 rounded-full bg-brand px-5 font-semibold text-brand-ink disabled:opacity-40">
+            <button disabled={busy || !input.trim()} className="h-11 rounded-full bg-foreground px-5 font-semibold text-background disabled:opacity-40">
               {t(lang, "send")}
             </button>
           </div>

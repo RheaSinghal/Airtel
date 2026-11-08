@@ -168,6 +168,7 @@ export const api = {
       `/kyc/consent-text?lang=${lang}`,
     ),
   consent: (id: string, accepted: boolean) => post(`/orders/${id}/consent`, { accepted }),
+  passbook: (id: string) => request<Passbook>(`/orders/${id}/passbook`),
   withdraw: (id: string) => post<{ ok: boolean; message: string }>(`/orders/${id}/consent/withdraw`),
   upload: (id: string, slot: string, file: File) => {
     const fd = new FormData();
@@ -253,6 +254,36 @@ export type QueueItem = {
   decile: number;
   expected_activation: number;
   kyc_issues?: string[];
+  recovery?: Recovery | null;
+};
+
+/** N3: engine-priced recovery offer + call brief for field sales / partners. */
+export type Recovery = {
+  family: string;
+  action: string;
+  language: string;
+  link?: string;
+  brief: string[];
+  offer: { tier: string; monthly_total: number; contract_months: number; ready_in_days: number; products: string[] } | null;
+};
+
+/** N2: consent receipt + access log. */
+export type Passbook = {
+  order_id: string;
+  status: "active" | "withdrawn" | "none";
+  receipt: {
+    receipt_id: string;
+    notice_version: string;
+    notice_sha256: string;
+    language: string;
+    purposes: string[];
+    data_items: string[];
+    given_at: string;
+    retained_until: string;
+  } | null;
+  access_log: { at: string; who: string; what: string; event: string }[];
+  documents_stored: number;
+  fields_stored: string[];
 };
 
 export type CallItem = {
@@ -266,6 +297,8 @@ export type CallItem = {
   score: number;
   expected_activation: number;
   owner: string;
+  language?: string;
+  recovery?: Recovery | null;
 };
 
 export type Bill = {
@@ -330,6 +363,7 @@ export type ScenarioRun = {
     monthly_total: number;
     excluded: string[];
   }[];
+  fact_guard?: { checked: number; blocked: number; reasons: Record<string, number> };
 };
 
 export type Insights = {
@@ -342,6 +376,11 @@ export type Insights = {
   drop_reasons: { reason: string; count: number }[];
   follow_up_vs_churn: { calls: number; customers: number; churn_6m: number; nps: number }[];
   activated_on_inactive_gstin: number;
+  audit?: {
+    activations: number;
+    flagged_activations: number;
+    checks: { check: string; label: string; violations: number; distinct_leads: number; leads: string[] }[];
+  };
   model: { auc: number; drivers: { feature: string; weight: number }[] };
 };
 

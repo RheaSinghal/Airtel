@@ -56,15 +56,15 @@ export default function WhatsAppSim() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-4 bg-[#0b141a] px-4 py-6 text-white lg:flex-row lg:items-start lg:justify-center lg:gap-10">
-      <aside className="max-w-sm space-y-3 text-sm text-white/80 lg:pt-10">
-        <Link href="/" className="text-white/60 underline">
+    <main className="flex min-h-screen flex-col items-center gap-4 bg-background px-4 py-6 text-foreground lg:flex-row lg:items-start lg:justify-center lg:gap-10">
+      <aside className="max-w-sm space-y-3 text-sm text-muted lg:pt-10">
+        <Link href="/" className="text-brand underline">
           ← Accel Business
         </Link>
-        <h1 className="text-2xl font-bold text-white">WhatsApp channel</h1>
+        <h1 className="text-[34px] text-foreground">WhatsApp channel</h1>
         <p>
           The same advisor, rules engine and pricing, on the app small businesses already use every day. This simulator calls the exact
-          handler behind the WhatsApp Cloud API webhook (<code className="text-white">/api/whatsapp/webhook</code>).
+          handler behind the WhatsApp Cloud API webhook (<code className="text-foreground">/api/whatsapp/webhook</code>).
         </p>
         <ul className="list-inside list-disc space-y-1">
           <li>Say &quot;hi&quot; or &quot;namaste&quot; to start (Hindi is detected automatically)</li>
@@ -74,7 +74,7 @@ export default function WhatsAppSim() {
         </ul>
         <label className="block pt-2">
           Customer phone (each number = separate chat)
-          <select value={phone} onChange={(e) => { setPhone(e.target.value); setChat([]); }} className="mt-1 block w-full rounded-lg bg-white/10 px-2 py-1.5">
+          <select value={phone} onChange={(e) => { setPhone(e.target.value); setChat([]); }} className="mt-1 block w-full h-11 rounded-xl border border-border bg-surface px-3 text-foreground">
             <option value="919800000001">+91 98000 00001</option>
             <option value="919800000002">+91 98000 00002</option>
             <option value="919800000003">+91 98000 00003</option>
@@ -84,7 +84,7 @@ export default function WhatsAppSim() {
 
       <div className="flex h-[760px] max-h-[88vh] w-full max-w-[390px] flex-col overflow-hidden rounded-[2.2rem] border-[10px] border-[#1f2c33] bg-[#efeae2] text-[#111b21] shadow-2xl">
         <header className="flex items-center gap-3 bg-[#008069] px-3 py-2.5 text-white">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-sm font-bold text-[#d6001c]">A</span>
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-sm font-bold text-[#1f1d1a]">A</span>
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1 font-semibold leading-tight">
               Accel Business

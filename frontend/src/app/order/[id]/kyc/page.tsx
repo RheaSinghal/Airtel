@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { Header } from "@/components/Header";
+import { speak } from "@/lib/speech";
 import { DigiLockerCard, ESignCard } from "@/components/KycExtras";
 import { api, type Check, type DocResult, type Order } from "@/lib/api";
 import { t, useLang } from "@/lib/i18n";
@@ -125,8 +126,20 @@ function KycPageInner() {
             ✓ {t(lang, "orderPlaced")}: <b>{order.id}</b>
           </p>
           {consent && (
-            <article className="space-y-4 rounded-2xl border border-border bg-surface p-5">
-              <h2 className="text-lg font-semibold">{consent.title}</h2>
+            <article className="space-y-4 rounded-[20px] border border-border bg-surface p-5">
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="text-[26px]">{consent.title}</h2>
+                <button
+                  type="button"
+                  onClick={() =>
+                    speak([consent.title, consent.purpose, consent.data.join(", "), consent.how, consent.share, consent.rights].join(". "), lang)
+                  }
+                  className="h-10 shrink-0 rounded-full border border-foreground px-4 text-sm font-medium"
+                  aria-label="Read the consent notice aloud"
+                >
+                  🔊 Listen
+                </button>
+              </div>
               <p>{consent.purpose}</p>
               <ul className="list-inside list-disc text-sm">
                 {consent.data.map((d) => (
@@ -136,14 +149,17 @@ function KycPageInner() {
               <p className="text-sm">{consent.how}</p>
               <p className="text-sm">{consent.share}</p>
               <p className="text-sm text-muted">{consent.rights}</p>
-              <p className="text-xs text-muted">Consent version {consent.version} · DPDP Act, 2023</p>
+              <p className="text-xs text-muted">
+                Consent version {consent.version} · DPDP Act, 2023 · You&apos;ll get a receipt and can see every use of your data on the
+                tracker.
+              </p>
             </article>
           )}
           <div className="mt-6 flex gap-3">
-            <Link href={`/order/${id}`} className="flex-1 rounded-xl border border-border py-3 text-center">
+            <Link href={`/order/${id}`} className="flex-1 rounded-full border border-foreground py-3 text-center">
               {t(lang, "decline")}
             </Link>
-            <button onClick={accept} className="flex-[2] rounded-xl bg-brand py-3 font-semibold text-brand-ink">
+            <button onClick={accept} className="flex-[2] h-12 rounded-full bg-foreground font-semibold text-background">
               {t(lang, "agree")}
             </button>
           </div>
@@ -190,7 +206,7 @@ function KycPageInner() {
             const skipped = s.id === "udyam_certificate" && noUdyam;
             const slotChecks = result?.checks.filter((c) => c.doc === s.id && c.status !== "pass") ?? [];
             return (
-              <li key={s.id} className={`rounded-2xl border border-border bg-surface p-4 ${skipped ? "opacity-60" : ""}`}>
+              <li key={s.id} className={`rounded-[20px] border border-border bg-surface p-4 ${skipped ? "opacity-60" : ""}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium">{lang === "hi" ? s.hi : s.en}</p>
@@ -206,7 +222,7 @@ function KycPageInner() {
                   </div>
                   {!skipped && (
                     <div className="flex shrink-0 gap-2">
-                      <label className="cursor-pointer rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-brand-ink">
+                      <label className="cursor-pointer rounded-full bg-foreground px-3 py-1.5 text-sm font-medium text-background">
                         {busySlot === s.id ? "…" : d ? "↻" : t(lang, "upload")}
                         <input
                           type="file"
@@ -257,7 +273,7 @@ function KycPageInner() {
         </ul>
 
         {result && (
-          <section className="mt-5 rounded-2xl border border-border bg-surface p-4">
+          <section className="mt-5 rounded-[20px] border border-border bg-surface p-4">
             <p
               className={`rounded-xl p-3 font-semibold ${
                 result.verdict === "verified" ? "bg-ok-soft text-ok" : result.verdict === "rejected" ? "bg-bad-soft text-bad" : "bg-warn-soft text-warn"
@@ -304,7 +320,7 @@ function KycPageInner() {
           <button
             onClick={verify}
             disabled={!ready || verifying || !!busySlot}
-            className="flex-[2] rounded-xl bg-brand py-3 font-semibold text-brand-ink disabled:opacity-40"
+            className="flex-[2] rounded-full bg-foreground py-3 font-semibold text-background disabled:opacity-40"
           >
             {verifying ? t(lang, "verifying") : t(lang, "verify")}
           </button>

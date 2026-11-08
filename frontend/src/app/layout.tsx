@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans, Noto_Sans_Devanagari } from "next/font/google";
+import { Suspense } from "react";
+import { DM_Sans, Instrument_Serif, Noto_Sans_Devanagari } from "next/font/google";
+import { Footer } from "@/components/Footer";
 import "./globals.css";
 
-const noto = Noto_Sans({ variable: "--font-noto", subsets: ["latin"] });
+const dm = DM_Sans({ variable: "--font-dm", subsets: ["latin"] });
+const instrument = Instrument_Serif({ variable: "--font-instrument", subsets: ["latin"], weight: "400", style: ["normal", "italic"] });
 const notoDeva = Noto_Sans_Devanagari({ variable: "--font-noto-deva", subsets: ["devanagari"], weight: ["400", "600", "700"] });
 
 export const metadata: Metadata = {
@@ -14,13 +17,18 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#d6001c",
+  themeColor: "#f6f1e7",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${noto.variable} ${notoDeva.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${dm.variable} ${instrument.variable} ${notoDeva.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      </body>
     </html>
   );
 }

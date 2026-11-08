@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/Header";
@@ -116,7 +118,17 @@ function Quote() {
     }
   };
 
-  if (!sid) return <p className="p-6">Start with the advisor first.</p>;
+  if (!sid)
+    return (
+      <main className="mx-auto w-full max-w-xl flex-1 px-4 py-16 text-center">
+        <p className="eyebrow mb-3">Quote</p>
+        <h1 className="text-[34px]">Your quote starts with three questions.</h1>
+        <p className="mt-3 text-muted">Tell the advisor about your business and it builds a bundle with one monthly price.</p>
+        <Link href="/advisor" className="mt-8 inline-flex h-12 items-center rounded-full bg-foreground px-7 font-semibold text-background">
+          Start with the advisor →
+        </Link>
+      </main>
+    );
 
   const problemFor = (pid: string) => problems.filter((p) => p.product_id === pid);
   const section = (core: boolean) => rows.filter((r) => r.core === core);
@@ -192,7 +204,7 @@ function Quote() {
                     ...session.recommendation!.addons.filter((a) => !ids.has(a.product_id)).map((l) => ({ ...l, on: false, core: false })),
                   ]);
                 }}
-                className={`flex-1 rounded-xl border px-3 py-2 text-sm ${n === tier ? "border-brand bg-brand-soft font-semibold text-brand" : "border-border bg-surface"}`}
+                className={`flex-1 rounded-xl border px-3 py-2 text-sm ${n === tier ? "border-foreground bg-brand-soft font-semibold text-brand" : "border-border bg-surface"}`}
               >
                 {tr.label}
               </button>
@@ -200,7 +212,7 @@ function Quote() {
           </div>
         )}
 
-        <section className="mt-4 rounded-2xl border border-border bg-surface px-4">
+        <section className="mt-4 rounded-[20px] border border-border bg-surface px-4">
           <ul className="divide-y divide-border">
             {section(true).map(renderRow)}
           </ul>
@@ -208,15 +220,15 @@ function Quote() {
 
         {section(false).length > 0 && (
           <section className="mt-4">
-            <h2 className="mb-2 font-semibold">{t(lang, "addons")}</h2>
-            <ul className="divide-y divide-border rounded-2xl border border-border bg-surface px-4">
+            <h2 className="mb-2 text-[22px]">{t(lang, "addons")}</h2>
+            <ul className="divide-y divide-border rounded-[20px] border border-border bg-surface px-4">
               {section(false).map(renderRow)}
             </ul>
           </section>
         )}
 
-        <section className="mt-4 rounded-2xl border border-border bg-surface p-4">
-          <h2 className="font-semibold">Check coverage at your address</h2>
+        <section className="mt-4 rounded-[20px] border border-border bg-surface p-4">
+          <h2 className="text-[22px]">Check coverage at your address</h2>
           <form
             className="mt-2 flex gap-2"
             onSubmit={(e) => {
@@ -238,14 +250,14 @@ function Quote() {
           {coverage && <p className={`mt-2 text-sm ${coverage.ok ? "text-ok" : "text-warn"}`}>{coverage.ok ? "✓ " : "ⓘ "}{coverage.text}</p>}
         </section>
 
-        <section className="mt-4 rounded-2xl border border-border bg-surface p-4">
-          <h2 className="font-semibold">{t(lang, "contract")}</h2>
+        <section className="mt-4 rounded-[20px] border border-border bg-surface p-4">
+          <h2 className="text-[22px]">{t(lang, "contract")}</h2>
           <div className="mt-3 grid grid-cols-3 gap-2">
             {[12, 24, 36].map((m) => (
               <button
                 key={m}
                 onClick={() => setContract(m)}
-                className={`rounded-xl border py-2 ${m === contract ? "border-brand bg-brand-soft font-semibold text-brand" : "border-border"}`}
+                className={`rounded-xl border py-2 ${m === contract ? "border-foreground bg-brand-soft font-semibold text-brand" : "border-border"}`}
               >
                 {m} {t(lang, "months")}
               </button>
@@ -273,7 +285,7 @@ function Quote() {
           )}
         </section>
 
-        <section className="mt-4 grid gap-3 rounded-2xl border border-border bg-surface p-4 sm:grid-cols-2">
+        <section className="mt-4 grid gap-3 rounded-[20px] border border-border bg-surface p-4 sm:grid-cols-2">
           <label className="text-sm">
             {t(lang, "contactName")}
             <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2" />
@@ -306,7 +318,7 @@ function Quote() {
           <button
             onClick={place}
             disabled={placing || !totals || problems.length > 0}
-            className="rounded-xl bg-brand px-6 py-3 font-semibold text-brand-ink disabled:opacity-40"
+            className="h-12 rounded-full bg-saffron px-6 font-semibold text-[#1f1d1a] disabled:opacity-40"
           >
             {placing ? t(lang, "placing") : t(lang, "placeOrder")}
           </button>

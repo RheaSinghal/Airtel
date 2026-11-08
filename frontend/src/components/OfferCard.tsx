@@ -23,7 +23,7 @@ export function OfferCard({
   const tt = cur.totals;
 
   return (
-    <div className="w-full overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+    <div className="w-full overflow-hidden rounded-[20px] border border-border bg-surface shadow-sm">
       {names.length > 1 && (
         <div role="tablist" className="grid border-b border-border" style={{ gridTemplateColumns: `repeat(${names.length}, 1fr)` }}>
           {names.map((n) => (
@@ -32,7 +32,7 @@ export function OfferCard({
               role="tab"
               aria-selected={n === tier}
               onClick={() => setTier(n)}
-              className={`px-2 py-2.5 text-sm font-medium ${n === tier ? "border-b-2 border-brand text-brand" : "text-muted"}`}
+              className={`px-2 py-2.5 text-sm font-medium ${n === tier ? "border-b-2 border-foreground text-brand" : "text-muted"}`}
             >
               {offer.tiers[n].label}
               <span className="block text-xs font-normal tabular">{inr(offer.tiers[n].totals.monthly_total)}</span>
@@ -107,7 +107,7 @@ export function OfferCard({
           </details>
         )}
         {onCheckout && (
-          <button onClick={() => onCheckout(tier)} className="mt-4 w-full rounded-xl bg-brand py-3 font-semibold text-brand-ink">
+          <button onClick={() => onCheckout(tier)} className="mt-4 w-full rounded-full bg-foreground py-3 font-semibold text-background">
             {t(lang, "seeQuote")} →
           </button>
         )}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { Header } from "@/components/Header";
+import { Passbook } from "@/components/Passbook";
 import { api, inr, type Order } from "@/lib/api";
 import { t, useLang } from "@/lib/i18n";
 
@@ -30,8 +31,8 @@ function slotOptions(): string[] {
 
 const DOT: Record<string, string> = {
   done: "bg-ok text-white",
-  current: "bg-brand text-brand-ink ring-4 ring-brand-soft",
-  next: "border-2 border-brand bg-surface",
+  current: "bg-saffron text-foreground ring-4 ring-brand-soft",
+  next: "border-2 border-foreground bg-surface",
   upcoming: "border-2 border-border bg-surface",
   blocked: "bg-bad text-white",
 };
@@ -63,9 +64,9 @@ function TrackerPageInner() {
     <>
       <Header lang={lang} setLang={setLang} title={order.id} backHref="/" />
       <main className="mx-auto w-full max-w-2xl flex-1 space-y-4 px-4 py-4 pb-16">
-        <section className="rounded-2xl border border-border bg-surface p-4">
+        <section className="rounded-[20px] border border-border bg-surface p-4">
           <p className="text-sm text-muted">{t(lang, "eta")}</p>
-          <p className="text-2xl font-bold">{order.status === "activated" ? "Live ✓" : fmt(tr.eta)}</p>
+          <p className="font-display text-[40px] leading-tight tabular">{order.status === "activated" ? "Live ✓" : fmt(tr.eta)}</p>
           <p className="mt-1 text-sm text-muted">
             {order.profile.business_type} · {order.profile.city} · {inr(order.quote.totals.monthly_total)}
             {t(lang, "perMonth")}
@@ -76,13 +77,13 @@ function TrackerPageInner() {
             </p>
           )}
           {needsKyc && (
-            <Link href={`/order/${id}/kyc`} className="mt-3 block rounded-xl bg-brand py-3 text-center font-semibold text-brand-ink">
+            <Link href={`/order/${id}/kyc`} className="mt-3 block rounded-full bg-foreground py-3 text-center font-semibold text-background">
               {order.status === "kyc_action_needed" ? "Fix documents →" : "Complete KYC (2 min) →"}
             </Link>
           )}
         </section>
 
-        <section className="rounded-2xl border border-border bg-surface p-4">
+        <section className="rounded-[20px] border border-border bg-surface p-4">
           <ol className="relative">
             {tr.stages.map((s, i) => (
               <li key={s.stage} className="relative flex gap-3 pb-5 last:pb-0">
@@ -105,14 +106,14 @@ function TrackerPageInner() {
         </section>
 
         {canPickSlot && (
-          <section className="rounded-2xl border border-border bg-surface p-4">
-            <h2 className="mb-3 font-semibold">{t(lang, "chooseSlot")}</h2>
+          <section className="rounded-[20px] border border-border bg-surface p-4">
+            <h2 className="mb-3 text-[22px]">{t(lang, "chooseSlot")}</h2>
             <div className="grid grid-cols-2 gap-2">
               {slotOptions().map((s) => (
                 <button
                   key={s}
                   onClick={async () => setOrder(await api.slot(id, s))}
-                  className="rounded-xl border border-border px-2 py-2 text-sm hover:border-brand"
+                  className="rounded-xl border border-border px-2 py-2 text-sm hover:border-foreground"
                 >
                   {s}
                 </button>
@@ -122,8 +123,8 @@ function TrackerPageInner() {
         )}
         {tr.slot && <p className="rounded-xl bg-ok-soft p-3 text-sm text-ok">🗓 Installation slot: {tr.slot}</p>}
 
-        <section className="rounded-2xl border border-border bg-surface p-4">
-          <h2 className="mb-2 font-semibold">{t(lang, "yourBundle")}</h2>
+        <section className="rounded-[20px] border border-border bg-surface p-4">
+          <h2 className="mb-2 text-[22px]">{t(lang, "yourBundle")}</h2>
           <ul className="divide-y divide-border text-sm">
             {tr.products.map((p) => {
               const line = order.quote.lines.find((l) => l.product_id === p.product_id);
@@ -140,8 +141,8 @@ function TrackerPageInner() {
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-border bg-surface p-4">
-          <h2 className="mb-2 font-semibold">{t(lang, "updates")}</h2>
+        <section className="rounded-[20px] border border-border bg-surface p-4">
+          <h2 className="mb-2 text-[22px]">{t(lang, "updates")}</h2>
           <ul className="space-y-2">
             {[...tr.notifications].reverse().map((n, i) => (
               <li key={i} className="rounded-xl bg-[#e7f8ee] p-3 text-sm text-[#0b3d1f] dark:bg-[#12301d] dark:text-[#cdeed9]">
@@ -153,10 +154,12 @@ function TrackerPageInner() {
           </ul>
         </section>
 
+        <Passbook orderId={id} refreshKey={`${order.status}-${order.consent?.withdrawn_at ?? ""}-${order.kyc?.verdict ?? ""}`} />
+
         <Link
           href={`/account/${id}`}
-          className={`block rounded-2xl border p-4 text-center font-semibold ${
-            order.status === "activated" ? "border-brand bg-brand text-brand-ink" : "border-border bg-surface"
+          className={`block rounded-[20px] border p-4 text-center font-semibold ${
+            order.status === "activated" ? "border-foreground bg-foreground text-background" : "border-border bg-surface"
           }`}
         >
           My business account: one bill, one support channel →

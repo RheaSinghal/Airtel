@@ -119,12 +119,12 @@ Fonts load through `next/font/google` (Instrument Serif, DM Sans, Noto Sans Deva
 ### Page checklist
 Tick a page only after it has been opened at 360 px and at desktop width and matches this document.
 
-- [ ] `/` landing
-- [ ] `/advisor`
-- [ ] `/quote`
-- [ ] `/order/[id]/kyc`
-- [ ] `/order/[id]` tracker
-- [ ] `/account/[id]`
-- [ ] `/whatsapp`
-- [ ] `/backoffice`
-- [ ] `/impact`
+- [x] `/` landing
+- [x] `/advisor`
+- [x] `/quote`
+- [x] `/order/[id]/kyc`
+- [x] `/order/[id]` tracker
+- [x] `/account/[id]`
+- [x] `/whatsapp`
+- [x] `/backoffice`
+- [x] `/impact`
