@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Header } from "@/components/Header";
+import { DigiLockerCard, ESignCard } from "@/components/KycExtras";
 import { api, type Check, type DocResult, type Order } from "@/lib/api";
 import { t, useLang } from "@/lib/i18n";
 
@@ -46,7 +47,7 @@ function KycPageInner() {
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const reload = useCallback(() => {
     api
       .order(id)
       .then((o) => {
@@ -59,8 +60,12 @@ function KycPageInner() {
         if (o.kyc) setResult({ verdict: o.kyc.verdict, checks: o.kyc.checks, blocked_products: [] });
       })
       .catch(() => setError("Order not found."));
-    api.samples().then(setSamples).catch(() => {});
   }, [id]);
+
+  useEffect(() => {
+    reload();
+    api.samples().then(setSamples).catch(() => {});
+  }, [reload]);
 
   useEffect(() => {
     api.consentText(lang).then(setConsent).catch(() => {});
@@ -154,6 +159,17 @@ function KycPageInner() {
     <>
       <Header lang={lang} setLang={setLang} title={t(lang, "documents")} backHref={`/order/${id}`} />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-4 pb-32">
+        <div className="mb-4">
+          <DigiLockerCard
+            orderId={id}
+            gstin={typeof order.profile.gstin === "string" ? order.profile.gstin : undefined}
+            onFetched={() => {
+              setResult(null);
+              reload();
+            }}
+          />
+        </div>
+        <p className="mb-3 text-center text-xs text-muted">or upload photos</p>
         {samples.length > 0 && (
           <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-border p-3 text-sm">
             <span className="text-muted">Demo: specimen applicant</span>
@@ -182,7 +198,9 @@ function KycPageInner() {
                       <p className={`text-xs ${d.quality.unreadable ? "text-bad" : "text-ok"}`}>
                         {d.quality.unreadable
                           ? "Too blurry to read. Please retake in good light."
-                          : `Read ✓${d.quality.rotation_deg ? ` · straightened ${d.quality.rotation_deg}°` : ""}`}
+                          : d.quality.source === "digilocker"
+                            ? `Verified from DigiLocker (${String((d.quality as Record<string, unknown>).issuer ?? "")}) ✓`
+                            : `Read ✓${d.quality.rotation_deg ? ` · straightened ${d.quality.rotation_deg}°` : ""}`}
                       </p>
                     )}
                   </div>
@@ -267,6 +285,11 @@ function KycPageInner() {
               </div>
             )}
           </section>
+        )}
+        {result && result.verdict !== "rejected" && (
+          <div className="mt-4">
+            <ESignCard orderId={id} signed={!!order.esign?.signed} onSigned={reload} />
+          </div>
         )}
         {error && <p className="mt-4 rounded-lg bg-bad-soft p-3 text-sm text-bad">{error}</p>}
       </main>

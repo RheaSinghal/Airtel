@@ -146,3 +146,30 @@ def test_hindi_multisite_answers_do_not_rename_business(client):
     r = say(client, sid, "मोबाइल हॉटस्पॉट")
     assert r["profile"]["business_type"] == "Bakery"
     assert r["profile"]["current_internet"] == "Mobile hotspot"
+
+
+def test_digilocker_and_esign(client):
+    o = _order(client)
+    oid = o["id"]
+    client.post(f"/api/orders/{oid}/consent", json={"accepted": True})
+    assert client.post(f"/api/orders/{oid}/digilocker/start", json={"mobile": "98765 43210"}).status_code == 200
+    assert client.post(f"/api/orders/{oid}/digilocker/authorise", json={"otp": "000000"}).status_code == 400
+    client.post(f"/api/orders/{oid}/digilocker/authorise", json={"otp": "123456"})
+    r = client.post(f"/api/orders/{oid}/digilocker/fetch", json={"gstin": "37LDYXK0296F1ZB"}).json()  # K09, active
+    assert {f["slot"] for f in r["fetched"]} == {"gst_certificate", "udyam_certificate", "signatory_id", "address_proof"}
+    v = client.post(f"/api/orders/{oid}/kyc/verify", json={}).json()
+    assert v["verdict"] == "verified", [c for c in v["checks"] if c["status"] != "pass"]
+    assert client.post(f"/api/orders/{oid}/esign/request").status_code == 200
+    es = client.post(f"/api/orders/{oid}/esign/verify", json={"otp": "123456"}).json()
+    assert es["signed"] and len(es["document_hash"]) == 64
+
+
+def test_digilocker_cancelled_gstin_still_rejected(client):
+    oid = _order(client)["id"]
+    client.post(f"/api/orders/{oid}/consent", json={"accepted": True})
+    client.post(f"/api/orders/{oid}/digilocker/start", json={"mobile": "9876543210"})
+    client.post(f"/api/orders/{oid}/digilocker/authorise", json={"otp": "123456"})
+    client.post(f"/api/orders/{oid}/digilocker/fetch", json={"gstin": "37IHKXV5167L1ZS"})  # K01, cancelled
+    v = client.post(f"/api/orders/{oid}/kyc/verify", json={}).json()
+    assert v["verdict"] == "rejected" and any(c["id"] == "gstin.status" for c in v["checks"] if c["status"] == "fail")
+    assert client.post(f"/api/orders/{oid}/esign/request").status_code == 409

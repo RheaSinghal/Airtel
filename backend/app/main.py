@@ -16,6 +16,7 @@ from .engine.pricing import CONTRACT_OPTIONS, quote
 from .engine.profile import BusinessProfile
 from .engine.rules import check_bundle
 from .i18n import LANGS, block_text
+from .kyc import digilocker
 from .kyc import service as kyc
 from .kyc.parse import DOC_TYPES
 
@@ -149,6 +150,8 @@ def _public_order(o: dict) -> dict:
         "id": o["id"], "status": o["status"], "lang": o["lang"], "created": o["created"],
         "profile": o["profile"], "items": o["items"], "contract_months": o["contract_months"], "quote": o["quote"],
         "consent": o.get("consent"), "kyc": kyc_view,
+        "esign": {k: v for k, v in ((o.get("extras") or {}).get("esign") or {}).items()},
+        "digilocker": bool(((o.get("extras") or {}).get("digilocker") or {}).get("authorised")),
         "documents": {d["doc_type"]: {"fields": kyc.masked_fields(d["fields"] or {}), "quality": d["quality"],
                                       "detected_type": d["detected_type"], "uploaded": d["uploaded"]} for d in docs},
         "tracker": orders.tracker_view(o),
@@ -266,6 +269,58 @@ def withdraw_consent(oid: str):
     _order_or_404(oid)
     kyc.withdraw(oid)
     return {"ok": True, "message": "Your documents and extracted details have been deleted."}
+
+
+# ------------------------------------------------------------------ DigiLocker + e-Sign (mock)
+
+class Mobile(BaseModel):
+    mobile: str
+
+
+class Otp(BaseModel):
+    otp: str
+
+
+class Gstin(BaseModel):
+    gstin: str
+
+
+def _dl(fn, *args):
+    try:
+        return fn(*args)
+    except KeyError:
+        raise HTTPException(404, "order not found")
+    except digilocker.DigiLockerError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/orders/{oid}/digilocker/start")
+def digilocker_start(oid: str, body: Mobile):
+    _require_consent(_order_or_404(oid))
+    return _dl(digilocker.start, oid, body.mobile)
+
+
+@app.post("/api/orders/{oid}/digilocker/authorise")
+def digilocker_authorise(oid: str, body: Otp):
+    return _dl(digilocker.authorise, oid, body.otp)
+
+
+@app.post("/api/orders/{oid}/digilocker/fetch")
+def digilocker_fetch(oid: str, body: Gstin):
+    return _dl(digilocker.fetch, oid, body.gstin)
+
+
+@app.post("/api/orders/{oid}/esign/request")
+def esign_request(oid: str):
+    o = _order_or_404(oid)
+    if (o.get("kyc") or {}).get("verdict") not in ("verified", "needs_attention"):
+        raise HTTPException(409, "KYC must be verified before signing")
+    return _dl(digilocker.esign_request, oid)
+
+
+@app.post("/api/orders/{oid}/esign/verify")
+def esign_verify(oid: str, body: Otp):
+    return _dl(digilocker.esign_verify, oid, body.otp)
 
 
 @app.get("/api/gstin/{gstin}")

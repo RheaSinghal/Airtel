@@ -21,11 +21,17 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE TABLE IF NOT EXISTS orders (
     id TEXT PRIMARY KEY, session_id TEXT, created TEXT, updated TEXT, lang TEXT,
     profile TEXT, items TEXT, contract_months INTEGER, quote TEXT, status TEXT,
-    consent TEXT, kyc TEXT, timeline TEXT, assigned_to TEXT, contact TEXT
+    consent TEXT, kyc TEXT, timeline TEXT, assigned_to TEXT, contact TEXT, extras TEXT
 );
 CREATE TABLE IF NOT EXISTS documents (
     order_id TEXT, doc_type TEXT, uploaded TEXT, detected_type TEXT, quality TEXT, fields TEXT,
     PRIMARY KEY (order_id, doc_type)
+);
+CREATE TABLE IF NOT EXISTS wa_sessions (
+    phone TEXT PRIMARY KEY, session_id TEXT, updated TEXT
+);
+CREATE TABLE IF NOT EXISTS tickets (
+    id TEXT PRIMARY KEY, order_id TEXT, created TEXT, updated TEXT, category TEXT, text TEXT, status TEXT, detail TEXT
 );
 CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, ref TEXT, type TEXT, detail TEXT
@@ -33,7 +39,10 @@ CREATE TABLE IF NOT EXISTS events (
 """
 
 JSON_COLS = {"meta", "profile", "messages", "recommendation", "items", "quote", "consent", "kyc", "timeline",
-             "quality", "fields", "detail", "contact"}
+             "quality", "fields", "detail", "contact", "extras"}
+
+# Columns added after the first release; ALTER them into older local databases.
+MIGRATIONS = [("orders", "extras", "TEXT")]
 
 
 def now() -> str:
@@ -51,6 +60,11 @@ def conn() -> sqlite3.Connection:
         _conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         _conn.row_factory = sqlite3.Row
         _conn.executescript(SCHEMA)
+        for table, col, typ in MIGRATIONS:
+            cols = {r[1] for r in _conn.execute(f"PRAGMA table_info({table})")}
+            if col not in cols:
+                _conn.execute(f"ALTER TABLE {table} ADD COLUMN {col} {typ}")
+        _conn.commit()
     return _conn
 
 

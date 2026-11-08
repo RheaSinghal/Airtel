@@ -100,6 +100,8 @@ export type Order = {
   quote: { lines: QuoteLine[]; totals: Totals };
   consent: { accepted: boolean; at: string; withdrawn_at: string | null } | null;
   kyc: { verdict: string; checks: Check[]; gst_verified: boolean } | null;
+  esign: Partial<ESign>;
+  digilocker: boolean;
   documents: Record<string, { fields: Record<string, string>; quality: Record<string, unknown>; detected_type: string | null }>;
   tracker: {
     order_id: string;
@@ -111,6 +113,9 @@ export type Order = {
     eta: string;
   };
 };
+
+export const errMsg = (e: unknown, fallback = "Something went wrong") =>
+  e instanceof ApiError && typeof e.detail === "string" ? e.detail : fallback;
 
 export class ApiError extends Error {
   constructor(public status: number, public detail: unknown) {
@@ -177,6 +182,13 @@ export const api = {
       { has_udyam },
     ),
   slot: (id: string, slot: string) => post<Order>(`/orders/${id}/slot`, { slot }),
+  dlStart: (id: string, mobile: string) => post<{ sent_to: string; demo_otp: string }>(`/orders/${id}/digilocker/start`, { mobile }),
+  dlAuthorise: (id: string, otp: string) => post<{ available: string[] }>(`/orders/${id}/digilocker/authorise`, { otp }),
+  dlFetch: (id: string, gstin: string) =>
+    post<{ fetched: { slot: string; issuer: string }[]; still_needed: string[]; gstin_status: string }>(`/orders/${id}/digilocker/fetch`, { gstin }),
+  esignRequest: (id: string) =>
+    post<{ agreement: Agreement; document_hash: string; demo_otp: string }>(`/orders/${id}/esign/request`),
+  esignVerify: (id: string, otp: string) => post<ESign>(`/orders/${id}/esign/verify`, { otp }),
   gstin: (g: string) => request<Record<string, unknown>>(`/gstin/${encodeURIComponent(g)}`),
   // back-office
   queue: () => request<QueueItem[]>("/backoffice/queue"),
@@ -187,6 +199,19 @@ export const api = {
       "/backoffice/orders",
     ),
   advance: (id: string, to?: string) => post<Order>(`/backoffice/orders/${id}/advance`, { to }),
+};
+
+export type ESign = { signed: boolean; signed_at?: string; method?: string; document_hash: string; requested_at: string };
+
+export type Agreement = {
+  order_id: string;
+  business: string;
+  city: string;
+  lines: { product: string; qty: number; monthly: number; setup: number; contract_months: number }[];
+  monthly_total_incl_gst: number;
+  setup_total_incl_gst: number;
+  lock_in_months: number;
+  terms_version: string;
 };
 
 export type DocResult = {

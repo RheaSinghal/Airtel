@@ -70,6 +70,11 @@ function TrackerPageInner() {
             {order.profile.business_type} · {order.profile.city} · {inr(order.quote.totals.monthly_total)}
             {t(lang, "perMonth")}
           </p>
+          {order.esign?.signed && (
+            <p className="mt-2 text-xs text-ok">
+              ✓ Agreement e-signed · SHA-256 {order.esign.document_hash?.slice(0, 12)}…
+            </p>
+          )}
           {needsKyc && (
             <Link href={`/order/${id}/kyc`} className="mt-3 block rounded-xl bg-brand py-3 text-center font-semibold text-brand-ink">
               {order.status === "kyc_action_needed" ? "Fix documents →" : "Complete KYC (2 min) →"}
