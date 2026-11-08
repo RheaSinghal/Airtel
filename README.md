@@ -26,6 +26,10 @@ Case: *Project Udyam Digital* (YTL Hackathon 2026, Enterprise Track A). Fictiona
 | **Advisor QA** (back-office tab, `pytest`) | 16 judge-style scenarios (tiers, GSTIN status, size and site limits, dependencies, no-fibre, mobile-only, Hindi) run end to end through the real dialogue. All pass, averaging 3 turns to a bundle. |
 | **Impact simulator** (`/impact`) | Each fix recovers a share of the exact drop reasons it addresses in `smb_leads.csv`. Projects conversion, activations, cost per activation, days to activate, churn and ARR, with conservative, expected and ambitious presets. |
 | **One-bill account** (`/account/:id`) | One consolidated GST bill with UPI pay, one help desk with free-text triage (EN/Hinglish/Hindi), SLAs and an automated line test. |
+| **Fact guard** (N1) | Every LLM-written sentence is checked against the engine's facts. An untraceable ₹ amount, product or "discount" falls back to the template (`backend/app/guard.py`). |
+| **Data passbook** (N2) | DPDP consent receipt (SHA-256 of the exact notice), listen-aloud consent, and an owner-visible log of every access to their KYC data. |
+| **Recovery playbook** (N3) | Every unclosed or dropped lead gets an engine-priced recovery offer and a call brief in the owner's language for field sales or partners. |
+| **Leads audit** (D4) | 68 of 368 historical activations broke a catalogue or GST rule (22 inactive GSTINs, 11 GSTIN-only sales without GSTIN, 24 tier, 8 size, 9 dependency). Shown in back-office Insights. |
 | **PIN-code coverage** | No fibre at the address: the bundle re-plans to 5G AirFiber (2-day install) and dependent products stay valid. |
 
 ### KYC results on the 12 specimen applicants
@@ -52,7 +56,7 @@ cd backend
 pip install -r requirements.txt
 cp .env.example .env          # optional: add an LLM key, the app works without one
 python -m uvicorn app.main:app --port 8000
-python -m pytest -q           # 50 tests
+python -m pytest -q           # 63 tests
 ```
 
 **Frontend** (Node 20+)
@@ -77,6 +81,10 @@ To try it on a phone, open `http://<your-laptop-ip>:3000` on the same Wi-Fi.
 | `backend/app/orders.py`, `backoffice.py` | Tracker and propensity model / queue / insights |
 | `frontend/src/app/` | Next.js pages: landing, advisor, quote, KYC, tracker, back-office |
 | `docs/PLAN.md` | Case summary, data insights, solution design, roadmap |
+| `docs/PROBLEMS.md` | Every case requirement → solution → code → evidence |
+| `docs/NOVELTY.md`, `docs/DESIGN.md`, `docs/STEPS.md` | Research, design system, execution plan |
+| `docs/ARCHITECTURE.md`, `docs/BUSINESS_CASE.md`, `docs/PRIVACY.md`, `docs/DEMO_SCRIPT.md` | Submission materials |
+| `docs/CODE_WALKTHROUGH.md` | Guided tour of the code |
 | `YTL_TrackA_Udyam_Digital_Data/` | Synthetic data pack |
 
 ## Timeline
