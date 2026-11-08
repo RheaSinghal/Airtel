@@ -8,7 +8,7 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import account, backoffice, impact, llm, orders, scenarios, store, whatsapp
+from . import account, backoffice, feasibility, impact, llm, orders, scenarios, store, whatsapp
 from .advisor import flow
 from .config import CORS_ORIGINS, DATA_DIR, KYC_RETENTION_DAYS, TODAY, WA_VERIFY_TOKEN
 from .data import catalogue, cities
@@ -350,6 +350,11 @@ def esign_request(oid: str):
 @app.post("/api/orders/{oid}/esign/verify")
 def esign_verify(oid: str, body: Otp):
     return _dl(digilocker.esign_verify, oid, body.otp)
+
+
+@app.get("/api/feasibility")
+def coverage(pin: str, city_tier: int | None = None):
+    return feasibility.check(pin, city_tier)
 
 
 @app.get("/api/gstin/{gstin}")

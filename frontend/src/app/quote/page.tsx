@@ -23,6 +23,9 @@ function Quote() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [placing, setPlacing] = useState(false);
+  const [override, setOverride] = useState<Profile | null>(null);
+  const [pin, setPin] = useState("");
+  const [coverage, setCoverage] = useState<{ ok: boolean; text: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,6 +46,28 @@ function Quote() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sid]);
 
+  const profile: Profile | null = override ?? session?.profile ?? null;
+
+  const checkCoverage = async () => {
+    if (!session || !profile) return;
+    const r = await api.feasibility(pin, typeof profile.city_tier === "number" ? profile.city_tier : undefined);
+    if (!r.valid) {
+      setCoverage({ ok: false, text: "Please enter a valid 6-digit PIN code." });
+      return;
+    }
+    const next = { ...profile, pin: r.pin, fibre_available: !!r.fibre };
+    setOverride(next);
+    setCoverage({ ok: !!r.fibre, text: r.message ?? "" });
+    if (!r.fibre) {
+      // Re-plan the bundle for this address: fibre lines become 5G AirFiber, dependents stay valid.
+      const offer = await api.offer(next, contract, lang);
+      const name = tier && offer.tiers[tier] ? tier : (offer.default ?? Object.keys(offer.tiers)[0]);
+      const core = offer.tiers[name].lines.map((l) => ({ ...l, on: true, core: true }));
+      const ids = new Set(core.map((l) => l.product_id));
+      setRows([...core, ...offer.addons.filter((a) => !ids.has(a.product_id)).map((l) => ({ ...l, on: false, core: false }))]);
+    }
+  };
+
   const selected = useMemo(
     () => rows.filter((r) => r.on).map((r) => ({ product_id: r.product_id, quantity: r.quantity })),
     [rows],
@@ -50,10 +75,10 @@ function Quote() {
 
   // Live re-pricing on every change; the server is the only source of prices.
   useEffect(() => {
-    if (!session || selected.length === 0) return;
+    if (!profile || selected.length === 0) return;
     const h = setTimeout(() => {
       api
-        .quote(session.profile as Profile, selected, contract, lang)
+        .quote(profile, selected, contract, lang)
         .then((q) => {
           setTotals(q.totals);
           setPrices(Object.fromEntries(q.lines.map((l) => [l.product_id, l])));
@@ -62,7 +87,7 @@ function Quote() {
         .catch(() => setError("Could not update the price."));
     }, 150);
     return () => clearTimeout(h);
-  }, [session, selected, contract, lang]);
+  }, [profile, selected, contract, lang]);
 
   const totals = selected.length ? quoted : null;
 
@@ -76,7 +101,7 @@ function Quote() {
     try {
       const o = await api.createOrder({
         session_id: session.id,
-        profile: session.profile,
+        profile: profile ?? session.profile,
         items: selected,
         contract_months: contract,
         lang,
@@ -189,6 +214,29 @@ function Quote() {
             </ul>
           </section>
         )}
+
+        <section className="mt-4 rounded-2xl border border-border bg-surface p-4">
+          <h2 className="font-semibold">Check coverage at your address</h2>
+          <form
+            className="mt-2 flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              checkCoverage().catch(() => setCoverage({ ok: false, text: "Could not check coverage." }));
+            }}
+          >
+            <input
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              inputMode="numeric"
+              placeholder="PIN code"
+              className="w-32 rounded-lg border border-border bg-background px-3 py-2 tabular"
+            />
+            <button disabled={pin.length !== 6} className="rounded-lg bg-foreground px-4 text-background disabled:opacity-40">
+              Check
+            </button>
+          </form>
+          {coverage && <p className={`mt-2 text-sm ${coverage.ok ? "text-ok" : "text-warn"}`}>{coverage.ok ? "✓ " : "ⓘ "}{coverage.text}</p>}
+        </section>
 
         <section className="mt-4 rounded-2xl border border-border bg-surface p-4">
           <h2 className="font-semibold">{t(lang, "contract")}</h2>

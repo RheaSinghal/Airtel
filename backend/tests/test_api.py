@@ -214,3 +214,13 @@ def test_one_bill_and_ticket_triage(client):
     t = client.post(f"/api/orders/{oid}/tickets", json={"text": "internet band hai since morning"}).json()
     assert t["category"] == "internet_down" and t["detail"]["priority"] == "high" and t["detail"]["diagnostics"]
     assert len(client.get(f"/api/orders/{oid}/tickets").json()) == 1
+
+
+def test_coverage_replans_to_airfiber(client):
+    no_fibre = next(p for p in range(452001, 452100) if not client.get(f"/api/feasibility?pin={p}&city_tier=2").json()["fibre"])
+    profile = {"segment": "micro", "city": "Indore", "city_tier": 2, "employees": 3, "sites": 1, "has_gstin": False,
+               "needs": ["internet", "payments", "cctv"], "fibre_available": False, "pin": str(no_fibre)}
+    offer = client.post("/api/offer", json={"profile": profile, "items": [], "contract_months": 12}).json()
+    ids = {l["product_id"] for l in offer["tiers"][offer["default"]]["lines"]}
+    assert "P04" in ids and "P01" not in ids and "P23" in ids  # CCTV still valid on AirFiber
+    assert client.get("/api/feasibility?pin=12").json()["valid"] is False

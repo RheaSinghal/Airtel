@@ -191,6 +191,10 @@ export const api = {
     post<{ agreement: Agreement; document_hash: string; demo_otp: string }>(`/orders/${id}/esign/request`),
   esignVerify: (id: string, otp: string) => post<ESign>(`/orders/${id}/esign/verify`, { otp }),
   waSimulate: (phone: string, text: string) => post<{ replies: WaReply[] }>("/whatsapp/simulate", { phone, text }),
+  feasibility: (pin: string, city_tier?: number) =>
+    request<{ pin: string; valid: boolean; fibre?: boolean; message?: string }>(
+      `/feasibility?pin=${encodeURIComponent(pin)}${city_tier ? `&city_tier=${city_tier}` : ""}`,
+    ),
   gstin: (g: string) => request<Record<string, unknown>>(`/gstin/${encodeURIComponent(g)}`),
   // back-office
   queue: () => request<QueueItem[]>("/backoffice/queue"),

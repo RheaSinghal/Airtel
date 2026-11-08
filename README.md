@@ -16,6 +16,18 @@ Case: *Project Udyam Digital* (YTL Hackathon 2026, Enterprise Track A). Fictiona
 | **Back-office** (`/backoffice`) | A queue of leads the advisor couldn't close and of KYC failures, ranked by a propensity model and routed to field sales, telesales or channel partners. Also a call-back list of historical drops and funnel insights. |
 | **Partner mode** | A local reseller runs the same advisor for the owner (`/advisor?partner=CODE`) and keeps credit for the lead. |
 
+### Beyond the brief (x-factor)
+
+| Feature | Why it matters |
+| --- | --- |
+| **DigiLocker pull + Aadhaar e-Sign** (mock, OTP `123456`) | Issuer-signed GST, Udyam and e-KYC in about 30 seconds: nothing to photograph, OCR or forge. The agreement is OTP-signed with a SHA-256 document hash. A cancelled GSTIN is still rejected. |
+| **WhatsApp channel** (`/whatsapp`, `/api/whatsapp/webhook`) | Meta Cloud API webhook in front of the same advisor: reply buttons and lists, numbered and multi-select replies, Hindi auto-detected. The simulator runs the exact webhook handler. |
+| **"Why not X?"** | Every excluded product shows the rule that blocks it, and the advisor answers "why not leased line?" from the rules engine, never from the model. |
+| **Advisor QA** (back-office tab, `pytest`) | 16 judge-style scenarios (tiers, GSTIN status, size and site limits, dependencies, no-fibre, mobile-only, Hindi) run end to end through the real dialogue. All pass, averaging 3 turns to a bundle. |
+| **Impact simulator** (`/impact`) | Each fix recovers a share of the exact drop reasons it addresses in `smb_leads.csv`. Projects conversion, activations, cost per activation, days to activate, churn and ARR, with conservative, expected and ambitious presets. |
+| **One-bill account** (`/account/:id`) | One consolidated GST bill with UPI pay, one help desk with free-text triage (EN/Hinglish/Hindi), SLAs and an automated line test. |
+| **PIN-code coverage** | No fibre at the address: the bundle re-plans to 5G AirFiber (2-day install) and dependent products stay valid. |
+
 ### KYC results on the 12 specimen applicants
 
 | Applicant | Verdict | Caught |
@@ -40,7 +52,7 @@ cd backend
 pip install -r requirements.txt
 cp .env.example .env          # optional: add an LLM key, the app works without one
 python -m uvicorn app.main:app --port 8000
-python -m pytest -q           # 26 tests
+python -m pytest -q           # 50 tests
 ```
 
 **Frontend** (Node 20+)
