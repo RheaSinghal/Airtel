@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "Submission Template_Sync.pptx"
 ASSETS = ROOT / "deck" / "assets"
 OUT = ROOT / "Kernel_TIET.pptx"
+REPO = "https://github.com/RheaSinghal/airtel"
 
 CHAR, CREAM, SAND, SAFF, DEEP, MUTED, GREEN, WHITE = (
     "1F1D1A", "F6F1E7", "EDE6D6", "F29A4A", "C2410C", "6B655B", "2F6B3F", "FFFFFF")
@@ -284,21 +285,40 @@ def novelty(prs, bg):
     s = new_content_slide(prs, bg)
     s.title([[{"t": "The LLM talks, code decides, and the field gets "}, {"t": "a better brief", "italic": True, "color": DEEP}]])
     cards = [
-        ("N1", "Fact guard", "Every LLM sentence is checked against the engine's output. An untraced ₹ amount, product or “discount” falls back to the template, so the 15 live judge scenarios can't see a made-up price.",
-         "After MEGHA (Harvard AI for Good 2025, 1st) and Padhai Check (MumbaiHacks 2025): answers checked against a source of truth."),
-        ("N2", "Data passbook", "Consent receipt with a SHA-256 of the exact notice, listen-aloud consent, and a log of every access to the owner's KYC data. Zero photos stored; one tap withdraws.",
-         "After Sahamati's multilingual consent bot and Skippers (Gen AI Exchange 2025): privacy you can see."),
-        ("N3", "Recovery playbook", "Each lost lead gets an engine-priced offer and a call brief in the owner's language: 36-month re-quote for price drops, DigiLocker for KYC drops, AirFiber where fibre can't reach.",
-         "After DreamOps (Warpspeed 2025, grand prize) and PitchLense (Gen AI Exchange 2025): the agent prepares, a human closes."),
+        ("N1", "Fact guard", "Every LLM sentence is checked against the engine's output; an untraced \u20b9 amount, product or \u201cdiscount\u201d falls back to the template.",
+         "After MEGHA (Harvard AI for Good 2025, 1st) and Padhai Check (MumbaiHacks 2025)."),
+        ("N2", "Data passbook", "Consent receipt hashed to the exact notice, listen-aloud consent, and a log of every access. Zero photos stored; one tap withdraws.",
+         "After Sahamati's multilingual consent bot and Skippers (Gen AI Exchange 2025)."),
+        ("N3", "Recovery playbook", "Each lost lead gets an engine-priced offer and a call brief in the owner's language: re-quote, DigiLocker link or AirFiber, by drop reason.",
+         "After DreamOps (Warpspeed 2025, grand prize) and PitchLense (Gen AI Exchange 2025)."),
     ]
     for i, (tag, name, body, src) in enumerate(cards):
         x = 0.45 + i * 3.07
         g = 1 + i
-        s.box(x, 1.38, 2.95, 2.2, fill=CREAM, group=g)
-        s.text(x + 0.16, 1.48, 0.6, 0.36, tag, size=20, font=HEAD, color=SAFF, group=g)
-        s.text(x + 0.72, 1.52, 2.1, 0.3, name, size=13, font=HEAD, color=CHAR, anchor=MSO_ANCHOR.MIDDLE, group=g)
-        s.text(x + 0.16, 1.9, 2.65, 1.0, body, size=9.5, color=CHAR, group=g)
-        s.text(x + 0.16, 2.95, 2.65, 0.55, src, size=7.5, italic=True, color=MUTED, group=g)
+        s.box(x, 1.38, 2.95, 2.22, fill=CREAM, group=g)
+        s.text(x + 0.16, 1.44, 0.6, 0.36, tag, size=20, font=HEAD, color=SAFF, group=g)
+        s.text(x + 0.72, 1.48, 2.1, 0.3, name, size=13, font=HEAD, color=CHAR, anchor=MSO_ANCHOR.MIDDLE, group=g)
+        vx, vy, vw, vh = x + 0.16, 1.86, 2.63, 0.62
+        if tag == "N1":  # what the guard does, shown not told
+            s.box(vx, vy, vw, 0.27, fill="F7E1DE", radius=0.05, group=g)
+            s.text(vx + 0.08, vy, vw - 0.16, 0.27, [[{"t": "LLM: ", "bold": True}, {"t": "\u201cOnly \u20b91/month + a free laptop!\u201d"},
+                                                     {"t": "  \u2715 blocked", "bold": True, "color": "A8322A"}]],
+                   size=7.5, color=CHAR, anchor=MSO_ANCHOR.MIDDLE, group=g)
+            s.box(vx, vy + 0.33, vw, 0.29, fill="E3EFE3", radius=0.05, group=g)
+            s.text(vx + 0.08, vy + 0.33, vw - 0.16, 0.29, [[{"t": "Owner sees: ", "bold": True}, {"t": "\u20b94,712/month incl. GST"},
+                                                            {"t": "  \u2713 engine", "bold": True, "color": GREEN}]],
+                   size=7.5, color=CHAR, anchor=MSO_ANCHOR.MIDDLE, group=g)
+        elif tag == "N2":  # the real passbook screen from the prototype
+            s.box(vx, vy, vw, vh, fill=WHITE, line=SAND, radius=0.05, group=g)
+            s.image(ASSETS / "passbook_strip.png", vx + (vw - vh * 716 / 190) / 2, vy, h=vh, group=g)
+        else:  # the engine-priced recovery offer
+            s.box(vx, vy, vw, vh, fill=CHAR, radius=0.05, group=g)
+            s.text(vx + 0.1, vy + 0.02, vw - 0.2, vh - 0.04,
+                   [[{"t": "\u201cPrice too high\u201d  \u2192  ", "color": "D8CFBF"}, {"t": "36-month re-quote", "bold": True}],
+                    [{"t": "\u20b93,679/mo", "font": HEAD, "size": 13, "color": SAFF}, {"t": "  \u20b91,033 less, same bundle", "color": "D8CFBF"}]],
+                   size=7.5, color=CREAM, anchor=MSO_ANCHOR.MIDDLE, group=g)
+        s.text(x + 0.16, 2.56, 2.65, 0.66, body, size=8.5, color=CHAR, group=g)
+        s.text(x + 0.16, 3.2, 2.65, 0.38, src, size=7, italic=True, color=MUTED, group=g)
     # field force strip
     s.box(0.45, 3.72, 5.55, 1.33, fill=CHAR, group=4)
     s.text(0.62, 3.8, 5.2, 0.25, "FIELD FORCE AND PARTNERS: DIGITAL FEEDS THEM, NOT REPLACES THEM", size=8, bold=True, color=SAFF, group=4)
@@ -334,17 +354,22 @@ def architecture(prs, bg):
         s.text(x, 1.82, w, 0.2, head, size=8, bold=True, color=MUTED, group=g)
         n = len(items)
         gap = 0.07
-        hh = (3.0 - gap * (n - 1)) / n
+        hh = (2.3 - gap * (n - 1)) / n
         for j, it in enumerate(items):
             y = 2.05 + j * (hh + gap)
             core = ci == 1 and it.startswith(("Rules", "N1"))
             s.box(x, y, w, hh, fill=SAFF if it.startswith("Rules") else (CREAM if not core else "FBE7D3"), group=g)
             s.text(x + 0.08, y, w - 0.16, hh, it, size=8.5, color=CHAR, bold=core, anchor=MSO_ANCHOR.MIDDLE, group=g)
-    s.arrow(2.03, 3.55, 2.29, 3.55, group=3)
-    s.arrow(4.6, 3.55, 4.87, 3.55, group=4)
+    s.arrow(2.03, 3.2, 2.29, 3.2, group=3)
+    s.arrow(4.6, 3.2, 4.87, 3.2, group=4)
+    s.box(0.45, 4.47, 6.0, 0.58, fill="FBE7D3", group=5)
+    s.text(0.6, 4.47, 5.75, 0.58, [[{"t": "SCALES BY SWAPPING MOCKS FOR INDIA STACK RAILS", "bold": True, "size": 7.5, "color": DEEP}],
+                                   "Stateless API behind a load balancer \u00b7 Postgres with row-level security \u00b7 GSTN via a GSP \u00b7 "
+                                   "DigiLocker & Aadhaar e-Sign \u00b7 Bhashini for 22 languages \u00b7 UPI AutoPay"],
+           size=8, color=CHAR, anchor=MSO_ANCHOR.MIDDLE, group=5)
     # privacy column
-    s.box(6.65, 1.36, 2.9, 3.69, fill=CREAM, group=5)
-    s.text(6.8, 1.46, 2.6, 0.3, "DPDP Act 2023, built in", size=13, font=HEAD, group=5)
+    s.box(6.65, 1.36, 2.9, 3.69, fill=CREAM, group=6)
+    s.text(6.8, 1.46, 2.6, 0.3, "DPDP Act 2023, built in", size=13, font=HEAD, group=6)
     s.text(6.8, 1.82, 2.62, 3.15, [
         [{"t": "Consent you can prove: ", "bold": True}, {"t": "receipt with notice hash, purpose, retention date."}],
         [{"t": "Purpose-limited: ", "bold": True}, {"t": "KYC only; never shared with partners or used for marketing."}],
@@ -353,7 +378,7 @@ def architecture(prs, bg):
         [{"t": "Transparent: ", "bold": True}, {"t": "owner sees every access; one tap withdraws and deletes."}],
         [{"t": "Accurate: ", "bold": True}, {"t": "checksum, registry status, cross-document and 90-day checks."}],
         [{"t": "AI-safe: ", "bold": True}, {"t": "the LLM never sets price or eligibility; the fact guard logs every blocked reply."}]],
-        size=8.5, color=CHAR, spacing=4.5, group=5)
+        size=8.5, color=CHAR, spacing=4.5, group=6)
     return s
 
 
@@ -406,13 +431,23 @@ def business(prs, bg):
         y = 1.72 + i * 0.58
         s.text(6.05, y, 0.8, 0.5, when, size=10, font=HEAD, color=DEEP, group=5 + i)
         s.text(6.85, y, 2.7, 0.55, what, size=8.5, group=5 + i)
-    s.text(6.05, 3.5, 3.5, 0.3, "Risks we designed for", size=13, font=HEAD, group=8)
-    s.text(6.05, 3.82, 3.5, 1.25, [
-        [{"t": "Wrong price live → ", "bold": True}, {"t": "engine decides; fact guard; 16 QA scenarios in CI."}],
-        [{"t": "KYC fraud → ", "bold": True}, {"t": "DigiLocker first; checksum, registry status, cross-document checks."}],
-        [{"t": "Channel conflict → ", "bold": True}, {"t": "partner attribution; human-only segments; briefs feed the field."}],
-        [{"t": "No fibre → ", "bold": True}, {"t": "PIN check re-plans to 5G AirFiber (2-day install)."}]],
-        size=8.5, spacing=2, group=8)
+    s.text(6.05, 3.42, 3.5, 0.62, [
+        [{"t": "Risks covered: ", "bold": True}, {"t": "wrong price live (engine + fact guard + 16 QA scenarios), KYC fraud (DigiLocker, registry checks), "
+                                                       "channel conflict (partner attribution), no fibre (AirFiber re-plan)."}]],
+        size=8, color=CHAR, group=8)
+    # GitHub: prominent and clickable (shape click + text hyperlink; the PDF keeps the text link)
+    card = s.box(6.05, 4.1, 3.5, 0.95, fill=CHAR, group=9)
+    card.click_action.hyperlink.address = REPO
+    tb = s.text(6.2, 4.14, 3.3, 0.88, [[{"t": "Explore the code & implementation \u2192", "font": HEAD, "size": 12.5, "color": SAFF}],
+                                        [{"t": "github.com/RheaSinghal/airtel", "size": 9, "color": CREAM}],
+                                        [{"t": "Backend, frontend, 63 tests and full docs", "size": 7.5, "color": "D8CFBF"}]],
+                anchor=MSO_ANCHOR.MIDDLE, group=9)
+    tb.click_action.hyperlink.address = REPO
+    for k, p in enumerate(tb.text_frame.paragraphs[:2]):
+        for r in p.runs:
+            r.hyperlink.address = REPO
+            r.font.color.rgb = rgb(SAFF if k == 0 else CREAM)
+            r.font.underline = k == 1
     return s
 
 
@@ -443,6 +478,18 @@ def main():
     ]
     for s, n in zip(slides, notes):
         s.s.notes_slide.notes_text_frame.text = "Traces to docs/PROBLEMS.md: " + n
+    # Theme hyperlink colour -> saffron, so the linked text matches the design instead of Office blue.
+    for rel in prs.slide_masters[0].part.rels.values():
+        if rel.reltype.endswith("/theme"):
+            ns = {"a": "http://schemas.openxmlformats.org/drawingml/2006/main"}
+            theme = etree.fromstring(rel.target_part.blob)
+            for tag in ("hlink", "folHlink"):
+                el = theme.find(f".//a:clrScheme/a:{tag}", ns)
+                if el is not None:
+                    for c in list(el):
+                        el.remove(c)
+                    etree.SubElement(el, "{%s}srgbClr" % ns["a"]).set("val", SAFF)
+            rel.target_part._blob = etree.tostring(theme, xml_declaration=True, encoding="UTF-8", standalone=True)
     prs.save(str(OUT))
     print("saved", OUT, len(prs.slides), "slides")
 
