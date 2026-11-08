@@ -8,7 +8,7 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import backoffice, llm, orders, store, whatsapp
+from . import backoffice, llm, orders, scenarios, store, whatsapp
 from .advisor import flow
 from .config import CORS_ORIGINS, DATA_DIR, KYC_RETENTION_DAYS, TODAY, WA_VERIFY_TOKEN
 from .data import catalogue, cities
@@ -373,6 +373,11 @@ def bo_queue():
 @app.get("/api/backoffice/call-list")
 def bo_call_list(limit: int = 50):
     return backoffice.historical_call_list(limit)
+
+
+@app.get("/api/backoffice/scenarios")
+def bo_scenarios():
+    return scenarios.run_all()
 
 
 @app.get("/api/backoffice/insights")

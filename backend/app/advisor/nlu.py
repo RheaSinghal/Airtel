@@ -90,6 +90,8 @@ INTERNET_KEYWORDS = [
     (r"leased line", "Leased line"),
     (r"home broadband|home wifi|ghar (ka|wala)", "Home broadband"),
     (r"business broadband|office broadband|broadband|fiber|fibre|ब्रॉडबैंड", "Business broadband"),
+    (r"mixed|different (isps?|providers?)|alag alag", "Mixed per site"),
+    (r"local isp|cable (net|internet)", "Business broadband"),
     (r"no internet|nothing|kuch nahi|कुछ नहीं|none", "None"),
 ]
 PROVIDERS = [(r"\bjio\b", "Competitor A"), (r"\bvi\b|vodafone|idea", "Competitor B"), (r"bsnl|local isp|cable", "Local ISP"),
@@ -158,7 +160,7 @@ def parse(text: str, expecting: str | None = None) -> dict:
         out["has_gstin"], out["gstin"] = True, g.group(1).upper()
     elif re.search(r"(no|nahi|नहीं|without|don'?t have).{0,12}gst|gst.{0,12}(nahi|नहीं|no\b|not)", low):
         out["has_gstin"] = False
-    elif re.search(r"(have|hai|है).{0,10}gst|gst.{0,10}(hai|है|registered)", low):
+    elif re.search(r"(have|hai|है).{0,10}gst|gst.{0,10}(hai|है|registered|yes|haan|हाँ)", low):
         out["has_gstin"] = True
     if UDYAM_IN_TEXT.search(t.upper()):
         out["has_udyam"] = True
@@ -166,7 +168,7 @@ def parse(text: str, expecting: str | None = None) -> dict:
     m = re.search(NUM + r"\s*(employees|employee|staff|people|log|लोग|कर्मचारी|workers|members)", low)
     if m:
         out["employees"] = _num(m)
-    m = re.search(NUM + r"\s*(shops|shop|branches|branch|outlets|outlet|stores|store|sites|site|locations|location|offices|office|centres|centre|clinics|factories|units|दुकानें|दुकान|ब्रांच)", low)
+    m = re.search(NUM + r"\s*(shops|shop|branches|branch|outlets|outlet|stores|store|sites|site|locations|location|offices|office|centres|centre|clinics|factories|factory|units|unit|labs|lab|दुकानें|दुकान|ब्रांच)", low)
     if m:
         out["sites"] = _num(m)
     if "sites" not in out:
@@ -213,7 +215,7 @@ def parse(text: str, expecting: str | None = None) -> dict:
             break
     if re.search(r"no fib(er|re)|fib(er|re) (not|nahi)|fibre unavailable", low):
         out["fibre_available"] = False
-    if re.search(r"only (a )?(mobile|sim)|just (a )?(sim|mobile)|sirf (sim|mobile)|सिर्फ़? (सिम|मोबाइल)", low):
+    if re.search(r"\b(only|just|sirf)\b.{0,20}\b(sims?|sim cards?|mobile (lines?|plans?|connections?))\b|सिर्फ़?\s.{0,12}(सिम|मोबाइल)", low):
         out["only_mobile"] = True
         out["needs"] = ["mobile_lines"]
 

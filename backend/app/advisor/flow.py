@@ -13,6 +13,7 @@ from pydantic import ValidationError
 
 from .. import llm, store
 from ..data import business_types, catalogue
+from ..engine.explain import WHY_NOT, answer_why
 from ..engine.offer import build_offer
 from ..engine.profile import ALL_NEEDS, BusinessProfile
 from ..kyc.identifiers import validate_gstin
@@ -125,6 +126,7 @@ class Turn:
         self.out: list[dict] = []
         session.setdefault("profile", {})
         self.meta = session.setdefault("meta", {})
+        self._start_profile = dict(session["profile"])
 
     def say(self, text: str, **extra):
         msg = {"role": "assistant", "text": text, **extra}
@@ -148,6 +150,8 @@ class Turn:
         if payload:
             self._apply_payload(payload)
         elif text:
+            if WHY_NOT.search(text) and self._why_not(text):
+                return self._continue(reask=True)
             if nlu.wants_human(text):
                 self._handoff("asked_for_human")
                 self._save()
@@ -252,6 +256,9 @@ class Turn:
             self._save()
             return self.out
         slot = self._next_slot()
+        if slot is None and self.s.get("stage") == "recommended" and self.s["profile"] == self._start_profile:
+            self._save()  # nothing changed: don't repeat the offer after a question
+            return self.out
         if slot is None:
             if self.meta.get("needs_open"):
                 slot = "needs"
@@ -321,6 +328,16 @@ class Turn:
             self.s["handoff_suggested"] = True
         else:
             self.say(_t("next_steps", self.lang), chips=chips, kind="info")
+
+    def _why_not(self, text: str) -> bool:
+        """Answer 'why not X?' from the rules engine (never from the model)."""
+        rec = self.s.get("recommendation") or {}
+        tier = (rec.get("tiers") or {}).get(rec.get("default") or "", {})
+        ids = {l["product_id"] for l in tier.get("lines", [])}
+        reply = answer_why(text, self.profile, ids, self.lang)
+        if reply:
+            self.say(reply, kind="answer")
+        return bool(reply)
 
     def _answer(self, question: str):
         cat = catalogue()

@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Bars } from "@/components/Bars";
 import { Logo } from "@/components/Header";
-import { api, inr, type CallItem, type Insights, type QueueItem } from "@/lib/api";
+import { api, inr, type CallItem, type Insights, type QueueItem, type ScenarioRun } from "@/lib/api";
 
-const TABS = ["Queue", "Orders", "Call-back list", "Insights"] as const;
+const TABS = ["Queue", "Orders", "Call-back list", "Insights", "Advisor QA"] as const;
 type Tab = (typeof TABS)[number];
 
 const REASON: Record<string, string> = {
@@ -35,6 +35,7 @@ export default function BackOffice() {
   const [orders, setOrders] = useState<Awaited<ReturnType<typeof api.boOrders>>>([]);
   const [calls, setCalls] = useState<CallItem[]>([]);
   const [ins, setIns] = useState<Insights | null>(null);
+  const [qa, setQa] = useState<ScenarioRun | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
@@ -53,7 +54,8 @@ export default function BackOffice() {
   useEffect(() => {
     if (tab === "Call-back list" && calls.length === 0) api.callList().then(setCalls).catch(() => {});
     if (tab === "Insights" && !ins) api.insights().then(setIns).catch(() => {});
-  }, [tab, calls.length, ins]);
+    if (tab === "Advisor QA" && !qa) api.scenarios().then(setQa).catch(() => {});
+  }, [tab, calls.length, ins, qa]);
 
   return (
     <>
@@ -335,6 +337,57 @@ export default function BackOffice() {
           </section>
         )}
         {tab === "Insights" && !ins && <p className="text-muted">Loading…</p>}
+
+        {tab === "Advisor QA" && !qa && <p className="text-muted">Running scenarios…</p>}
+        {tab === "Advisor QA" && qa && (
+          <section className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                ["Scenarios passing", `${qa.passed} / ${qa.total}`],
+                ["Avg. turns to a bundle", String(qa.avg_turns)],
+                ["Rule violations", String(qa.results.filter((r) => r.failures.some((f) => f.includes("breaks rules"))).length)],
+              ].map(([k, v]) => (
+                <div key={k} className="rounded-xl border border-border bg-surface p-4">
+                  <p className="text-xs text-muted">{k}</p>
+                  <p className="text-2xl font-bold tabular">{v}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-muted">
+              Each scenario types a real owner message into the advisor, answers whatever it asks, and checks the recommended bundle:
+              must-include and must-exclude products, quantities, segment, and that every tier passes the rules engine.
+            </p>
+            <ul className="space-y-2">
+              {qa.results.map((r) => (
+                <li key={r.id} className="rounded-xl border border-border bg-surface p-4">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="font-semibold">
+                      <span className={`mr-2 rounded-full px-2 py-0.5 text-xs ${r.passed ? "bg-ok-soft text-ok" : "bg-bad-soft text-bad"}`}>
+                        {r.passed ? "✓ pass" : "✕ fail"}
+                      </span>
+                      {r.id} · {r.title}
+                    </p>
+                    <p className="text-sm tabular text-muted">
+                      {r.turns} turns · {inr(r.monthly_total)}/mo · {SEG[r.segment] ?? r.segment}
+                    </p>
+                  </div>
+                  <p className="mt-1 text-sm italic text-muted">&ldquo;{r.input}&rdquo;</p>
+                  <p className="mt-2 text-sm">{r.bundle.map((b) => `${b.name}${b.qty > 1 ? ` ×${b.qty}` : ""}`).join(" · ")}</p>
+                  {r.excluded.map((e) => (
+                    <p key={e} className="text-xs text-warn">
+                      ⊘ {e}
+                    </p>
+                  ))}
+                  {r.failures.map((f) => (
+                    <p key={f} className="text-xs text-bad">
+                      {f}
+                    </p>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
     </>
   );

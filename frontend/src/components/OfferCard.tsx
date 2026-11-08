@@ -92,6 +92,20 @@ export function OfferCard({
           </div>
         )}
         {explanation && <p className="mt-3 whitespace-pre-line text-sm text-muted">{explanation}</p>}
+        {offer.why_not && offer.why_not.length > 0 && (
+          <details className="mt-3 rounded-lg border border-border p-3 text-sm">
+            <summary className="cursor-pointer font-medium">Why not other products? ({offer.why_not.length})</summary>
+            <ul className="mt-2 space-y-1">
+              {offer.why_not.map((w) => (
+                <li key={w.product_id}>
+                  <span className="font-medium">{w.name}</span>
+                  <span className="text-muted">: {w.reasons.join("; ")}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-muted">Checked by our rules engine against the product catalogue, not guessed.</p>
+          </details>
+        )}
         {onCheckout && (
           <button onClick={() => onCheckout(tier)} className="mt-4 w-full rounded-xl bg-brand py-3 font-semibold text-brand-ink">
             {t(lang, "seeQuote")} →

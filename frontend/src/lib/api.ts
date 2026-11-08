@@ -43,6 +43,7 @@ export type Offer = {
   default: string | null;
   addons: QuoteLine[];
   contract_months: number;
+  why_not?: { product_id: string; name: string; reasons: string[] }[];
 };
 
 export type Message = {
@@ -195,6 +196,7 @@ export const api = {
   queue: () => request<QueueItem[]>("/backoffice/queue"),
   callList: () => request<CallItem[]>("/backoffice/call-list?limit=40"),
   insights: () => request<Insights>("/backoffice/insights"),
+  scenarios: () => request<ScenarioRun>("/backoffice/scenarios"),
   boOrders: () =>
     request<{ id: string; status: string; created: string; business: string; city: string; monthly: number; kyc: string | null }[]>(
       "/backoffice/orders",
@@ -255,6 +257,26 @@ export type CallItem = {
   score: number;
   expected_activation: number;
   owner: string;
+};
+
+export type ScenarioRun = {
+  passed: number;
+  total: number;
+  avg_turns: number;
+  results: {
+    id: string;
+    title: string;
+    input: string;
+    lang: string;
+    passed: boolean;
+    failures: string[];
+    questions: string[];
+    turns: number;
+    segment: string;
+    bundle: { product_id: string; name: string; qty: number }[];
+    monthly_total: number;
+    excluded: string[];
+  }[];
 };
 
 export type Insights = {

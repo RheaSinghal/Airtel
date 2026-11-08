@@ -4,6 +4,7 @@ from __future__ import annotations
 from ..data import catalogue
 from ..i18n import TIER_NAMES, note_text, reason_text
 from .bundler import addon_suggestions, recommend
+from .explain import why_not_list
 from .pricing import quote
 from .profile import BusinessProfile
 
@@ -39,4 +40,5 @@ def build_offer(p: BusinessProfile, lang: str = "en", contract_months: int = 12)
     addon_quote = quote(addons, contract_months)["lines"] if addons else []
     for line, a in zip(addon_quote, addons):
         line.update(why=a["why"], description=a["description"], optional=True)
-    return {"tiers": tiers, "default": default, "addons": addon_quote, "contract_months": contract_months}
+    return {"tiers": tiers, "default": default, "addons": addon_quote, "contract_months": contract_months,
+            "why_not": why_not_list(p, bundle_ids, lang)}
