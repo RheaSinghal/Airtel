@@ -201,6 +201,9 @@ class Turn:
 
     def _absorb(self, facts: dict):
         facts = dict(facts)
+        bt = facts.get("business_type")
+        if bt and facts.get("sites") is None and self.s["profile"].get("sites") is None                 and business_types().get(bt) in ("micro", "prof"):
+            facts["sites"] = 1  # single-premise businesses: one question fewer; "actually 3 shops" corrects it
         gstin = facts.pop("gstin", None)
         data = _merge(self.s["profile"], facts)
         if gstin:

@@ -173,3 +173,25 @@ def test_digilocker_cancelled_gstin_still_rejected(client):
     v = client.post(f"/api/orders/{oid}/kyc/verify", json={}).json()
     assert v["verdict"] == "rejected" and any(c["id"] == "gstin.status" for c in v["checks"] if c["status"] == "fail")
     assert client.post(f"/api/orders/{oid}/esign/request").status_code == 409
+
+
+def test_whatsapp_conversation(client):
+    phone = "919811112222"
+    wa = lambda text: client.post("/api/whatsapp/simulate", json={"phone": phone, "text": text}).json()["replies"]
+    r = wa("hi")
+    assert "advisor" in r[0]["text"].lower() and r[0]["list"]
+    r = wa("I run a CA firm in Lucknow, 7 staff, 1 office, home broadband, no GST")
+    assert any("spend" in m["text"].lower() or "month" in m["text"].lower() for m in r)
+    r = wa("3000 rs")
+    r = wa("1,2,3")  # pick needs by number
+    assert any("₹" in m["text"] and "/month" in m["text"] for m in r)
+    btns = next(m for m in r if m.get("buttons"))
+    r = wa(btns["buttons"][0]["id"])  # "See price & checkout"
+    assert "/quote?session=" in r[0]["text"]
+
+
+def test_whatsapp_webhook_verify_and_payload(client):
+    v = client.get("/api/whatsapp/webhook", params={"hub.mode": "subscribe", "hub.verify_token": "udyam-verify", "hub.challenge": "42"})
+    assert v.text == "42"
+    payload = {"entry": [{"changes": [{"value": {"messages": [{"from": "919833334444", "type": "text", "text": {"body": "namaste"}}]}}]}]}
+    assert client.post("/api/whatsapp/webhook", json=payload).json() == {"ok": True}

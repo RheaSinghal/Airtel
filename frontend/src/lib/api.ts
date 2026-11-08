@@ -189,6 +189,7 @@ export const api = {
   esignRequest: (id: string) =>
     post<{ agreement: Agreement; document_hash: string; demo_otp: string }>(`/orders/${id}/esign/request`),
   esignVerify: (id: string, otp: string) => post<ESign>(`/orders/${id}/esign/verify`, { otp }),
+  waSimulate: (phone: string, text: string) => post<{ replies: WaReply[] }>("/whatsapp/simulate", { phone, text }),
   gstin: (g: string) => request<Record<string, unknown>>(`/gstin/${encodeURIComponent(g)}`),
   // back-office
   queue: () => request<QueueItem[]>("/backoffice/queue"),
@@ -213,6 +214,8 @@ export type Agreement = {
   lock_in_months: number;
   terms_version: string;
 };
+
+export type WaReply = { text: string; buttons?: { id: string; title: string }[]; list?: { id: string; title: string }[] };
 
 export type DocResult = {
   slot: string;

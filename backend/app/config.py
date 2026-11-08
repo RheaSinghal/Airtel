@@ -34,3 +34,9 @@ CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3
 
 CONSENT_VERSION = "2026-07-v1"
 KYC_RETENTION_DAYS = 180  # extracted, verified fields; raw images are never persisted
+
+# WhatsApp Cloud API (optional). Without a token, replies are only returned/simulated.
+WA_VERIFY_TOKEN = os.getenv("WA_VERIFY_TOKEN", "udyam-verify")
+WA_TOKEN = os.getenv("WA_TOKEN", "")
+WA_PHONE_ID = os.getenv("WA_PHONE_ID", "")
+PUBLIC_APP_URL = os.getenv("PUBLIC_APP_URL", "http://localhost:3000")

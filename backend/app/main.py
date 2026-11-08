@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
+from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import backoffice, llm, orders, store
+from . import backoffice, llm, orders, store, whatsapp
 from .advisor import flow
-from .config import CORS_ORIGINS, DATA_DIR, KYC_RETENTION_DAYS, TODAY
+from .config import CORS_ORIGINS, DATA_DIR, KYC_RETENTION_DAYS, TODAY, WA_VERIFY_TOKEN
 from .data import catalogue, cities
 from .engine.offer import build_offer
 from .engine.pricing import CONTRACT_OPTIONS, quote
@@ -331,6 +332,35 @@ def gstin_lookup(gstin: str):
 @app.get("/api/udyam/{number}")
 def udyam_lookup(number: str):
     return kyc.lookup_udyam(number)
+
+
+# ------------------------------------------------------------------ WhatsApp
+
+@app.get("/api/whatsapp/webhook")
+def wa_verify(mode: str = Query(alias="hub.mode", default=""), token: str = Query(alias="hub.verify_token", default=""),
+              challenge: str = Query(alias="hub.challenge", default="")):
+    if mode == "subscribe" and token == WA_VERIFY_TOKEN:
+        return PlainTextResponse(challenge)
+    raise HTTPException(403, "verification failed")
+
+
+@app.post("/api/whatsapp/webhook")
+async def wa_webhook(request: Request):
+    payload = await request.json()
+    for phone, text in whatsapp.parse_webhook(payload):
+        whatsapp.send(phone, whatsapp.handle(phone, text))
+    return {"ok": True}
+
+
+class WaSimulate(BaseModel):
+    phone: str = Field(default="919800000001", max_length=20)
+    text: str = Field(max_length=1000)
+
+
+@app.post("/api/whatsapp/simulate")
+def wa_simulate(body: WaSimulate):
+    """Same handler as the webhook; returns the replies instead of sending them."""
+    return {"replies": whatsapp.handle(body.phone, body.text)}
 
 
 # ------------------------------------------------------------------ back-office

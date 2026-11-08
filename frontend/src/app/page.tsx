@@ -53,6 +53,12 @@ export default function Home() {
           >
             {t(lang, "start")} →
           </Link>
+          <Link
+            href="/whatsapp"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-[#25d366] px-6 py-3 font-semibold text-[#128c4b] sm:ml-3 sm:w-auto sm:inline-flex dark:text-[#5dd38a]"
+          >
+            💬 Or chat on WhatsApp
+          </Link>
         </section>
 
         <section className="rounded-2xl border border-border bg-surface p-5">
