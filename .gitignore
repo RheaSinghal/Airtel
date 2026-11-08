@@ -20,3 +20,6 @@ out/
 
 # Local scratch
 .scratch/
+
+# Deck build intermediates
+deck/build/
