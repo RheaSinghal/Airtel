@@ -1,10 +1,10 @@
 """KYC orchestration: consent -> upload (OCR + parse) -> verify. Raw images are never persisted."""
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from .. import llm, store
-from ..config import CONSENT_VERSION, KYC_RETENTION_DAYS, TODAY
+from ..config import CONSENT_VERSION, KYC_RETENTION_DAYS
 from ..data import gstin_registry, udyam_registry
 from .identifiers import mask_gstin, mask_id, mask_udyam, validate_gstin, validate_udyam
 from .ocr import BLUR_THRESHOLD, read
@@ -56,7 +56,9 @@ def record_consent(order_id: str, accepted: bool, lang: str) -> dict:
     consent = {"version": CONSENT_VERSION, "accepted": accepted, "at": at, "lang": lang,
                "purposes": ["kyc_verification"], "withdrawn_at": None}
     if accepted:  # N2: the owner keeps a receipt tied to the exact notice they saw
-        consent["receipt"] = passbook.receipt(order_id, consent_text(lang), lang, at, retention_until())
+        order = store.get("orders", id=order_id) or {}
+        eta = ((order.get("timeline") or {}).get("plan") or {}).get("activated")
+        consent["receipt"] = passbook.receipt(order_id, consent_text(lang), lang, at, retention_until(eta or at))
     store.update("orders", {"id": order_id}, {"consent": consent, "updated": store.now()})
     store.log(order_id, "consent", {"accepted": accepted, "version": CONSENT_VERSION})
     return consent
@@ -114,8 +116,10 @@ def withdraw(order_id: str):
     store.log(order_id, "consent_withdrawn", {})
 
 
-def retention_until() -> str:
-    return (TODAY + timedelta(days=KYC_RETENTION_DAYS)).isoformat()
+def retention_until(activation: str) -> str:
+    """The notice promises retention for KYC_RETENTION_DAYS after activation, so the receipt counts from the
+    order's planned activation date (or the consent time when there is no plan yet)."""
+    return (datetime.fromisoformat(activation).date() + timedelta(days=KYC_RETENTION_DAYS)).isoformat()
 
 
 # --- Mock registry APIs ---------------------------------------------------------------------

@@ -235,6 +235,11 @@ def test_data_passbook_receipt_and_access_log(client):
     rec = c["receipt"]
     assert rec["notice_sha256"] == passbook.notice_hash(consent_text("en"))
     assert rec["receipt_id"].startswith(f"CR-{oid}-") and rec["retained_until"]
+    # the receipt must match the notice: retention runs from the planned activation date, not a fixed date
+    from datetime import date, timedelta
+    from app.config import KYC_RETENTION_DAYS
+    eta = client.get(f"/api/orders/{oid}").json()["tracker"]["eta"]
+    assert rec["retained_until"] == (date.fromisoformat(eta[:10]) + timedelta(days=KYC_RETENTION_DAYS)).isoformat()
     client.post(f"/api/orders/{oid}/documents/gst_certificate/sample/K03")
     pb = client.get(f"/api/orders/{oid}/passbook").json()
     assert pb["status"] == "active" and pb["documents_stored"] == 0
