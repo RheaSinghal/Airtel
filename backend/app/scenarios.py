@@ -6,6 +6,7 @@ the rule checker. Run from the back-office ("Advisor QA") or `pytest`.
 """
 from __future__ import annotations
 
+from . import guard
 from .advisor import flow
 from .engine.profile import BusinessProfile
 from .engine.rules import check_bundle
@@ -134,4 +135,4 @@ def run_all() -> dict:
     passed = sum(r["passed"] for r in results)
     turns = [r.get("turns", 0) for r in results if r.get("turns")]
     return {"passed": passed, "total": len(results), "avg_turns": round(sum(turns) / len(turns), 1) if turns else None,
-            "results": results}
+            "results": results, "fact_guard": guard.stats()}

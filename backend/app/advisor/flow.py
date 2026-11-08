@@ -11,7 +11,7 @@ import re
 
 from pydantic import ValidationError
 
-from .. import llm, store
+from .. import guard, llm, store
 from ..data import business_types, catalogue
 from ..engine.explain import WHY_NOT, answer_why
 from ..engine.offer import build_offer
@@ -33,7 +33,8 @@ def _t(key: str, lang: str, **kw) -> str:
     base = Q.get(lang, Q["en"]).get(key) or Q["en"][key]
     text = base.format(**kw) if kw else base
     if lang not in Q and llm.enabled():
-        return llm.phrase(Q["en"][key].format(**kw) if kw else Q["en"][key], lang) or text
+        english = Q["en"][key].format(**kw) if kw else Q["en"][key]
+        return guard.vet(llm.phrase(english, lang), english, text)
     return text
 
 
@@ -308,18 +309,24 @@ class Turn:
             lines.append(_t(key, self.lang, diff=abs(diff), spend=spend, count=len(tier["lines"])))
         summary = " ".join(lines)
         explanation = None
+        template = " ".join(f"• {l['name']}{' ×' + str(l['quantity']) if l['quantity'] > 1 else ''}: {l['why']}"
+                            for l in tier["lines"])
+        if tier["notes"]:
+            template += " " + " ".join(tier["notes"])
         if llm.enabled():
-            explanation = llm.explain({
+            facts = {
                 "business": business, "city": p.city, "employees": p.employees, "sites": p.sites,
-                "monthly_total_incl_gst": tier["totals"]["monthly_total"], "current_spend": spend,
+                "monthly_total_incl_gst": tier["totals"]["monthly_total"],
+                "monthly_before_tax": tier["totals"]["monthly_before_tax"], "current_spend": spend,
+                "difference_vs_current": abs(tier["totals"]["monthly_before_tax"] - spend) if spend else None,
+                "ready_in_days": tier["totals"]["ready_in_days"],
                 "items": [{"product": l["name"], "qty": l["quantity"], "monthly": l["monthly"], "why": l["why"]} for l in tier["lines"]],
                 "left_out": tier["notes"],
-            }, self.lang)
+            }
+            # N1 fact guard: the LLM's wording is used only if every number and product traces to `facts`.
+            explanation = guard.vet(llm.explain(facts, self.lang), facts, template, self.s["id"])
         if not explanation:
-            explanation = " ".join(f"• {l['name']}{' ×' + str(l['quantity']) if l['quantity'] > 1 else ''}: {l['why']}"
-                                   for l in tier["lines"])
-            if tier["notes"]:
-                explanation += " " + " ".join(tier["notes"])
+            explanation = template
         self.say(summary, kind="recommendation", recommendation=offer, explanation=explanation)
         chips = [{"label": _t("see_quote", self.lang), "payload": {"action": "quote"}, "primary": True},
                  {"label": _t("talk_to_expert", self.lang), "payload": {"action": "handoff", "reason": "wants_expert"}}]
@@ -346,7 +353,7 @@ class Turn:
             ctx = {"profile": self.profile.model_dump(exclude_none=True),
                    "catalogue": [{"id": p.id, "name": p.name, "desc": p.description, "price": f"₹{p.price_min}-{p.price_max} {p.unit}/month",
                                   "needs_gstin": p.requires_gstin, "tiers": p.city_tiers} for p in cat.values()]}
-            reply = llm.answer(question, ctx, self.lang)
+            reply = guard.vet(llm.answer(question, ctx, self.lang), ctx, "", self.s["id"]) or None
         if not reply:
             low = question.lower()
             hit = next((p for p in cat.values() if any(w in low for w in re.findall(r"[a-z0-9]{3,}", p.name.lower()) if w not in ("biz", "business", "cloud"))), None)
