@@ -65,9 +65,14 @@ export default function BackOffice() {
             <Logo />
             <span className="rounded-md bg-surface-2 px-2 py-0.5 text-xs text-muted">Back-office</span>
           </div>
-          <button onClick={load} className="rounded-lg border border-border px-3 py-1.5 text-sm">
-            Refresh
-          </button>
+          <div className="flex gap-2">
+            <Link href="/impact" className="rounded-lg bg-foreground px-3 py-1.5 text-sm text-background">
+              Impact simulator
+            </Link>
+            <button onClick={load} className="rounded-lg border border-border px-3 py-1.5 text-sm">
+              Refresh
+            </button>
+          </div>
         </div>
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4" role="tablist">
           {TABS.map((t) => (

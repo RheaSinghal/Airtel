@@ -197,6 +197,7 @@ export const api = {
   callList: () => request<CallItem[]>("/backoffice/call-list?limit=40"),
   insights: () => request<Insights>("/backoffice/insights"),
   scenarios: () => request<ScenarioRun>("/backoffice/scenarios"),
+  impact: (body: { levers?: Record<string, number>; digital_share?: number; status_calls?: number }) => post<Impact>("/impact", body),
   boOrders: () =>
     request<{ id: string; status: string; created: string; business: string; city: string; monthly: number; kyc: string | null }[]>(
       "/backoffice/orders",
@@ -257,6 +258,28 @@ export type CallItem = {
   score: number;
   expected_activation: number;
   owner: string;
+};
+
+export type ImpactSide = {
+  funnel: { stage: string; count: number }[];
+  activations: number;
+  rate: number;
+  cac: number;
+  days: number;
+  churn_6m: number;
+  status_calls: number;
+  arr: number;
+};
+
+export type Impact = {
+  levers: { key: string; label: string; value: number; stage: string; addresses: string[] }[];
+  digital_share: number;
+  status_calls: number;
+  baseline: ImpactSide;
+  scenario: ImpactSide;
+  contributions: { lever: string; label: string; extra_activations: number }[];
+  presets: Record<string, { levers: Record<string, number>; digital_share: number; status_calls: number }>;
+  assumptions: string[];
 };
 
 export type ScenarioRun = {

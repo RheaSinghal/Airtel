@@ -195,3 +195,12 @@ def test_whatsapp_webhook_verify_and_payload(client):
     assert v.text == "42"
     payload = {"entry": [{"changes": [{"value": {"messages": [{"from": "919833334444", "type": "text", "text": {"body": "namaste"}}]}}]}]}
     assert client.post("/api/whatsapp/webhook", json=payload).json() == {"ok": True}
+
+
+def test_impact_simulator(client):
+    base = client.post("/api/impact", json={"levers": {k: 0 for k in
+                       ["self_serve", "advisor", "instant_quote", "smart_kyc", "fulfilment"]}}).json()
+    assert base["scenario"]["activations"] == base["baseline"]["activations"] == 368  # no levers = today
+    r = client.post("/api/impact", json={}).json()
+    assert r["scenario"]["activations"] > 368 and r["scenario"]["cac"] < r["baseline"]["cac"]
+    assert r["scenario"]["days"] < r["baseline"]["days"]

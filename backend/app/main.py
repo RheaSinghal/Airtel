@@ -8,7 +8,7 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import backoffice, llm, orders, scenarios, store, whatsapp
+from . import backoffice, impact, llm, orders, scenarios, store, whatsapp
 from .advisor import flow
 from .config import CORS_ORIGINS, DATA_DIR, KYC_RETENTION_DAYS, TODAY, WA_VERIFY_TOKEN
 from .data import catalogue, cities
@@ -373,6 +373,17 @@ def bo_queue():
 @app.get("/api/backoffice/call-list")
 def bo_call_list(limit: int = 50):
     return backoffice.historical_call_list(limit)
+
+
+class ImpactRequest(BaseModel):
+    levers: dict[str, float] = Field(default_factory=dict)
+    digital_share: float = Field(default=0.3, ge=0, le=1)
+    status_calls: float = Field(default=2.0, ge=1, le=5)
+
+
+@app.post("/api/impact")
+def impact_sim(body: ImpactRequest):
+    return impact.simulate(body.levers or None, body.digital_share, body.status_calls)
 
 
 @app.get("/api/backoffice/scenarios")
