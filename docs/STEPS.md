@@ -13,4 +13,4 @@ Each step is committed on its own. The tests have to keep passing: `cd backend &
 - [x] **9. Restyle every page to DESIGN.md + novelty UI**: X1, P1, N2, N3, D4. Files: `frontend/src/app/**`, `frontend/src/components/**`, `globals.css`, `layout.tsx`. *Done when:* `npm run build` passes and every page in the DESIGN.md §20 checklist has been checked at 360 px and desktop.
 - [x] **10. Coverage re-check**: all IDs. Files: `docs/PROBLEMS.md`. *Done when:* every row is done except E1 (the video recording is manual).
 - [x] **11. Round 1 deck**: R1 and all IDs. Files: `deck/`, `Kernel_TIET.pptx`, `Kernel_TIET.pdf`. *Done when:* there are 7 slides on the official template, exported through PowerPoint to PDF, and two render-and-critique passes are done.
-- [ ] **12. Code walkthrough**. Files: `docs/CODE_WALKTHROUGH.md`. *Done when:* a new reviewer can run the app and follow each journey step to code.
+- [x] **12. Code walkthrough**. Files: `docs/CODE_WALKTHROUGH.md`. *Done when:* a new reviewer can run the app and follow each journey step to code.
