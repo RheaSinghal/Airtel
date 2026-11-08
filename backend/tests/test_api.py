@@ -204,3 +204,13 @@ def test_impact_simulator(client):
     r = client.post("/api/impact", json={}).json()
     assert r["scenario"]["activations"] > 368 and r["scenario"]["cac"] < r["baseline"]["cac"]
     assert r["scenario"]["days"] < r["baseline"]["days"]
+
+
+def test_one_bill_and_ticket_triage(client):
+    oid = _order(client)["id"]
+    b = client.get(f"/api/orders/{oid}/bill").json()
+    assert b["total"] == b["subtotal"] + b["gst"] and b["upi_link"].startswith("upi://pay")
+    assert b["separate_bills_before"] >= 2
+    t = client.post(f"/api/orders/{oid}/tickets", json={"text": "internet band hai since morning"}).json()
+    assert t["category"] == "internet_down" and t["detail"]["priority"] == "high" and t["detail"]["diagnostics"]
+    assert len(client.get(f"/api/orders/{oid}/tickets").json()) == 1

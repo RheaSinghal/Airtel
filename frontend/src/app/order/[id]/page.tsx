@@ -153,6 +153,15 @@ function TrackerPageInner() {
           </ul>
         </section>
 
+        <Link
+          href={`/account/${id}`}
+          className={`block rounded-2xl border p-4 text-center font-semibold ${
+            order.status === "activated" ? "border-brand bg-brand text-brand-ink" : "border-border bg-surface"
+          }`}
+        >
+          My business account: one bill, one support channel →
+        </Link>
+
         <section className="space-y-2 text-center text-sm">
           <Link href="/advisor?new=1" className="block text-muted underline">
             {t(lang, "help")}

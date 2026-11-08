@@ -8,7 +8,7 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import backoffice, impact, llm, orders, scenarios, store, whatsapp
+from . import account, backoffice, impact, llm, orders, scenarios, store, whatsapp
 from .advisor import flow
 from .config import CORS_ORIGINS, DATA_DIR, KYC_RETENTION_DAYS, TODAY, WA_VERIFY_TOKEN
 from .data import catalogue, cities
@@ -176,6 +176,34 @@ def choose_slot(oid: str, body: Slot):
     if not store.get("orders", id=oid):
         raise HTTPException(404, "order not found")
     return _public_order(orders.book_slot(oid, body.slot))
+
+
+# ------------------------------------------------------------------ account: one bill, one support channel
+
+@app.get("/api/orders/{oid}/bill")
+def get_bill(oid: str):
+    return account.bill(_order_or_404(oid))
+
+
+class TicketIn(BaseModel):
+    text: str = Field(min_length=3, max_length=500)
+    category: str | None = None
+
+
+@app.post("/api/orders/{oid}/tickets")
+def new_ticket(oid: str, body: TicketIn):
+    return account.create_ticket(_order_or_404(oid), body.text, body.category)
+
+
+@app.get("/api/orders/{oid}/tickets")
+def list_tickets(oid: str):
+    _order_or_404(oid)
+    return account.tickets(oid)
+
+
+@app.get("/api/support/categories")
+def support_categories():
+    return {k: v["label"] for k, v in account.CATEGORIES.items()}
 
 
 # ------------------------------------------------------------------ KYC

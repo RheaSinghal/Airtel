@@ -196,6 +196,10 @@ export const api = {
   queue: () => request<QueueItem[]>("/backoffice/queue"),
   callList: () => request<CallItem[]>("/backoffice/call-list?limit=40"),
   insights: () => request<Insights>("/backoffice/insights"),
+  bill: (id: string) => request<Bill>(`/orders/${id}/bill`),
+  tickets: (id: string) => request<Ticket[]>(`/orders/${id}/tickets`),
+  newTicket: (id: string, text: string, category?: string) => post<Ticket>(`/orders/${id}/tickets`, { text, category }),
+  supportCategories: () => request<Record<string, string>>("/support/categories"),
   scenarios: () => request<ScenarioRun>("/backoffice/scenarios"),
   impact: (body: { levers?: Record<string, number>; digital_share?: number; status_calls?: number }) => post<Impact>("/impact", body),
   boOrders: () =>
@@ -258,6 +262,28 @@ export type CallItem = {
   score: number;
   expected_activation: number;
   owner: string;
+};
+
+export type Bill = {
+  order_id: string;
+  period: string;
+  due_date: string;
+  lines: { name: string; category: string; quantity: number; amount: number }[];
+  subtotal: number;
+  gst: number;
+  total: number;
+  upi_link: string;
+  separate_bills_before: number;
+  categories: string[];
+};
+
+export type Ticket = {
+  id: string;
+  created: string;
+  category: string;
+  text: string;
+  status: string;
+  detail: { label: string; team: string; priority: string; resolve_by: string; diagnostics: { line_test: string; action: string } | null };
 };
 
 export type ImpactSide = {
